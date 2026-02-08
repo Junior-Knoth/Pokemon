@@ -1,0 +1,128 @@
+.container {
+  padding: var(--spacing-xl);
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background-color: var(--bg-primary);
+  border-bottom: 2px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.title {
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.user-email {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.logout-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--danger-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-title {
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.description {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xl);
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.card {
+  padding: var(--spacing-xl);
+  background-color: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-color);
+}
+
+.card-title {
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.card-description {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-lg);
+  font-size: 0.9rem;
+}
+
+.card-button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  color: white;
+  min-width: 120px;
+}
+
+.card-button.primary {
+  background-color: var(--primary-color);
+}
+
+.card-button.primary:hover {
+  background-color: #2f3da6;
+}
+
+.card-button.success {
+  background-color: var(--success-color);
+}
+
+.card-button.success:hover {
+  background-color: #218838;
+}
+
+.card-button.warning {
+  background-color: var(--warning-color);
+  color: var(--text-primary);
+}
+
+.card-button.warning:hover {
+  background-color: #e0a800;
+}
