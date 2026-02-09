@@ -48,6 +48,9 @@ export type Database = {
           species_name: string;
           caught_at: string | null;
           is_active: boolean | null;
+          sprite_url: string | null;
+          type_1: string | null;
+          type_2: string | null;
           created_at: string | null;
         };
         Insert: {
@@ -58,6 +61,9 @@ export type Database = {
           species_name: string;
           caught_at?: string | null;
           is_active?: boolean | null;
+          sprite_url?: string | null;
+          type_1?: string | null;
+          type_2?: string | null;
           created_at?: string | null;
         };
         Update: {
@@ -68,6 +74,9 @@ export type Database = {
           species_name?: string;
           caught_at?: string | null;
           is_active?: boolean | null;
+          sprite_url?: string | null;
+          type_1?: string | null;
+          type_2?: string | null;
           created_at?: string | null;
         };
       };

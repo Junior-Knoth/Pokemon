@@ -1,17 +1,18 @@
 :root {
-  --primary-color: #3b4cca;
-  --secondary-color: #ffcb05;
-  --success-color: #28a745;
-  --danger-color: #dc3545;
-  --warning-color: #ffc107;
-  --info-color: #17a2b8;
+  --primary-color: #5b6fcf;
+  --secondary-color: #d4a422;
+  --success-color: #2ea043;
+  --danger-color: #da3633;
+  --warning-color: #d4a422;
+  --info-color: #3b82f6;
 
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --border-color: #dee2e6;
+  --bg-primary: #1a1b1e;
+  --bg-secondary: #25262b;
+  --bg-tertiary: #2c2e33;
+  --border-color: #373a40;
 
-  --text-primary: #212529;
-  --text-secondary: #6c757d;
+  --text-primary: #e4e6eb;
+  --text-secondary: #adb5bd;
 
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -20,7 +21,7 @@
   --spacing-xl: 2rem;
 
   --border-radius: 8px;
-  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -35,7 +36,7 @@ body {
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--bg-secondary);
+  background-color: #0d1117;
   color: var(--text-primary);
 }
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Pokémon Database - React + Supabase
 
 Uma aplicação para gerenciar sua jornada Pokémon, incluindo jogos, equipe e batalhas.
@@ -126,3 +127,6 @@ export default defineConfig([
   },
 ])
 ````
+=======
+# Pokemon
+>>>>>>> 2721eca142aa804baa26ac4508ddd28e776f7bb4

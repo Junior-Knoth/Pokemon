@@ -3,9 +3,12 @@ import { useAuth } from "./hooks/useAuth";
 import { Auth } from "./components/Auth";
 import { Dashboard } from "./pages/Dashboard";
 import { Games } from "./pages/Games";
+import { Pokemons } from "./pages/Pokemons";
+import { Battles } from "./pages/Battles";
+import { PokemonProvider } from "./context/PokemonContext";
 import styles from "./App.module.css";
 
-type View = "dashboard" | "games";
+type View = "dashboard" | "games" | "pokemons" | "battles";
 
 function App() {
   const { user, loading, signOut } = useAuth();
@@ -28,7 +31,7 @@ function App() {
   };
 
   return (
-    <>
+    <PokemonProvider>
       {currentView === "dashboard" && (
         <Dashboard
           userEmail={user.email || "Usuário"}
@@ -37,7 +40,9 @@ function App() {
         />
       )}
       {currentView === "games" && <Games onNavigate={handleNavigate} />}
-    </>
+      {currentView === "pokemons" && <Pokemons onNavigate={handleNavigate} />}
+      {currentView === "battles" && <Battles onNavigate={handleNavigate} />}
+    </PokemonProvider>
   );
 }
 
