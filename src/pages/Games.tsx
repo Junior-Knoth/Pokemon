@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import { Header } from "../components/Header/Header";
 import styles from "./Games.module.css";
 
 interface Game {
@@ -139,15 +140,11 @@ export function Games({ onNavigate }: GamesProps) {
 
   return (
     <div className={styles["container"]}>
-      <header className={styles["header"]}>
-        <h1 className={styles["title"]}>Meus Jogos Pokémon</h1>
-        <button
-          onClick={() => onNavigate("dashboard")}
-          className={styles["back-button"]}
-        >
-          ← Voltar
-        </button>
-      </header>
+      <Header
+        title="Meus Jogos Pokémon"
+        showBackButton
+        onBack={() => onNavigate("dashboard")}
+      />
 
       <main className={styles["main"]}>
         {/* Formulário para adicionar jogo */}

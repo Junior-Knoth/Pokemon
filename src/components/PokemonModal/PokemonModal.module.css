@@ -297,6 +297,14 @@
   margin: 0;
 }
 
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
 .action-button {
   width: 100%;
   padding: var(--spacing-md);
@@ -308,7 +316,6 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: var(--spacing-md);
   position: relative;
   overflow: hidden;
 }
@@ -330,6 +337,47 @@
 
 .action-button:hover::before {
   width: 100%;
+}
+
+/* Delete Button */
+.delete-button {
+  width: 100%;
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.delete-button::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background-color: #fca5a5;
+  transition: width 0.3s ease;
+}
+
+.delete-button:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.delete-button:hover::before {
+  width: 100%;
+}
+
+.delete-button:active {
+  transform: translateY(0);
 }
 
 /* Sections */
@@ -444,13 +492,20 @@
   text-align: center;
 }
 
-/* Evolution Chain */
+/* Evolution Chain - Árvore Recursiva */
 .evolution-chain {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
+  align-items: flex-start;
+  padding: var(--spacing-lg);
+  overflow-x: auto;
+}
+
+.evolution-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .evolution-stage {
@@ -490,50 +545,88 @@
   font-weight: 600;
   color: var(--text-primary);
   text-transform: capitalize;
+  text-align: center;
+  max-width: 100px;
 }
 
 .evolution-connector {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: var(--spacing-xs);
-  position: relative;
-  margin: 0 var(--spacing-md);
-  min-width: 80px;
+  padding: var(--spacing-xs) 0;
 }
 
 .evolution-line {
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--border-color) 0%,
-    var(--primary-color) 50%,
-    var(--border-color) 100%
-  );
+  width: 2px;
+  height: 30px;
+  background: linear-gradient(to bottom, var(--primary-color), transparent);
   position: relative;
 }
 
 .evolution-line::after {
-  content: "➤";
+  content: "▼";
   position: absolute;
-  right: -8px;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
   color: var(--primary-color);
-  font-size: 1rem;
+  font-size: 0.8rem;
 }
 
 .evolution-requirement {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: var(--text-primary);
   background-color: var(--bg-tertiary);
-  padding: 0.3rem 0.6rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 6px;
   border: 1px solid var(--border-color);
   white-space: nowrap;
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: 0.25rem;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Múltiplas ramificações evolutivas - Layout Horizontal */
+.evolution-branches {
+  display: flex;
+  gap: var(--spacing-xl);
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.evolution-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .evolution-chain {
+    padding: var(--spacing-md);
+  }
+
+  .evolution-branches {
+    gap: var(--spacing-lg);
+  }
+
+  .evolution-sprite {
+    width: 60px;
+    height: 60px;
+  }
+
+  .evolution-name {
+    font-size: 0.7rem;
+  }
+
+  .evolution-requirement {
+    font-size: 0.6rem;
+  }
 }

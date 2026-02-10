@@ -4,6 +4,7 @@ import { fetchPokemonFromAPI, TYPE_COLORS } from "../../lib/pokeapi";
 import type { PokeAPIPokemon } from "../../lib/pokeapi";
 import { PokemonCard } from "../../components/PokemonCard";
 import { usePokemon } from "../../context/PokemonContext";
+import { Header } from "../../components/Header/Header";
 import styles from "./Pokemons.module.css";
 
 interface Game {
@@ -99,6 +100,86 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
     setCurrentBoxPage(1);
   }, [activeGameId]);
 
+  const exportPokemonList = async () => {
+    try {
+      // Buscar todos os pokémons com informações de jogo
+      const { data: allPokemons, error } = await supabase
+        .from("pokemons")
+        .select(
+          `
+          id,
+          nickname,
+          species_name,
+          game_id,
+          is_active,
+          games (name)
+        `,
+        )
+        .order("game_id")
+        .order("nickname");
+
+      if (error) throw error;
+
+      if (!allPokemons || allPokemons.length === 0) {
+        alert("Nenhum Pokémon para exportar!");
+        return;
+      }
+
+      // Agrupar pokémons por jogo
+      const pokemonsByGame: { [key: string]: any[] } = {};
+
+      allPokemons.forEach((pokemon: any) => {
+        const gameName = pokemon.games?.name || "Sem Jogo";
+        if (!pokemonsByGame[gameName]) {
+          pokemonsByGame[gameName] = [];
+        }
+        pokemonsByGame[gameName].push(pokemon);
+      });
+
+      // Gerar conteúdo do arquivo
+      let content = "=== MINHA LISTA DE POKÉMON ===\n\n";
+
+      Object.keys(pokemonsByGame)
+        .sort()
+        .forEach((gameName) => {
+          content += `-- ${gameName} --\n`;
+          pokemonsByGame[gameName].forEach((pokemon) => {
+            const displayName = pokemon.nickname || pokemon.species_name;
+            const speciesInfo =
+              pokemon.nickname && pokemon.nickname !== pokemon.species_name
+                ? ` - ${pokemon.species_name}`
+                : "";
+            const status = pokemon.is_active ? " [PARTY]" : "";
+            content += `${displayName}${speciesInfo}${status}\n`;
+          });
+          content += `\n`;
+        });
+
+      content += `\nTotal de Pokémon: ${allPokemons.length}\n`;
+      content += `Total de Jogos: ${Object.keys(pokemonsByGame).length}\n`;
+      content += `\n=== FIM DA LISTA ===`;
+
+      // Criar e baixar arquivo
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const date = new Date().toISOString().split("T")[0];
+      link.download = `meus_pokemons_${date}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setSuccess("Lista exportada com sucesso!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      console.error("Erro ao exportar lista:", err);
+      setError("Erro ao exportar lista de Pokémon");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
   const fetchGames = async () => {
     try {
       const { data, error: fetchError } = await supabase
@@ -124,6 +205,26 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
     } catch (err) {
       // O erro já é tratado no contexto com alert
       console.error("Erro ao alterar status:", err);
+    }
+  };
+
+  const handleDeletePokemon = async (pokemonId: string) => {
+    try {
+      const { error } = await supabase
+        .from("pokemons")
+        .delete()
+        .eq("id", pokemonId);
+
+      if (error) throw error;
+
+      setSuccess("Pokémon deletado com sucesso!");
+      setTimeout(() => setSuccess(""), 3000);
+
+      // Atualizar lista
+      await fetchPokemons(activeGameId);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao deletar Pokémon");
+      setTimeout(() => setError(""), 5000);
     }
   };
 
@@ -311,41 +412,43 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
 
   return (
     <div className={styles["container"]}>
-      <header className={styles["header"]}>
-        <h1 className={styles["title"]}>Meus Pokémon</h1>
-        <div className={styles["header-controls"]}>
-          <div className={styles["filter-group"]}>
-            <label htmlFor="game-filter" className={styles["filter-label"]}>
-              Filtrar por jogo:
-            </label>
-            <select
-              id="game-filter"
-              value={activeGameId || ""}
-              onChange={(e) => setActiveGameId(e.target.value || null)}
-              className={styles["select"]}
-            >
-              <option value="">Todos os jogos</option>
-              {games.map((game) => (
-                <option key={game.id} value={game.id}>
-                  {game.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className={styles["add-button"]}
+      <Header
+        title="Meus Pokémon"
+        showBackButton
+        onBack={() => onNavigate("dashboard")}
+      >
+        <div className={styles["filter-group"]}>
+          <label htmlFor="game-filter" className={styles["filter-label"]}>
+            Filtrar por jogo:
+          </label>
+          <select
+            id="game-filter"
+            value={activeGameId || ""}
+            onChange={(e) => setActiveGameId(e.target.value || null)}
+            className={styles["select"]}
           >
-            + Adicionar Pokémon
-          </button>
-          <button
-            onClick={() => onNavigate("dashboard")}
-            className={styles["back-button"]}
-          >
-            ← Voltar
-          </button>
+            <option value="">Todos os jogos</option>
+            {games.map((game) => (
+              <option key={game.id} value={game.id}>
+                {game.name}
+              </option>
+            ))}
+          </select>
         </div>
-      </header>
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className={styles["add-button"]}
+        >
+          + Adicionar Pokémon
+        </button>
+        <button
+          onClick={exportPokemonList}
+          className={styles["export-button"]}
+          title="Exportar lista completa de Pokémons"
+        >
+          📥 Exportar Lista
+        </button>
+      </Header>
 
       {/* Modal de Adicionar Pokémon */}
       {isAddModalOpen && (
@@ -594,6 +697,7 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
                         key={pokemon.id}
                         pokemon={pokemon}
                         onToggleTeam={handleToggleTeam}
+                        onDelete={handleDeletePokemon}
                         isInParty={true}
                       />
                     );
@@ -646,6 +750,7 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
                       key={pokemon.id}
                       pokemon={pokemon}
                       onToggleTeam={handleToggleTeam}
+                      onDelete={handleDeletePokemon}
                       isInParty={false}
                     />
                   ))}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import { usePokemon } from "../../context/PokemonContext";
+import { Header } from "../../components/Header/Header";
 import styles from "./Battles.module.css";
 
 interface Game {
@@ -475,7 +476,7 @@ export function Battles({ onNavigate }: BattlesProps) {
   const downloadBattleSummary = (battle: Battle) => {
     const date = new Date(battle.battle_date).toLocaleDateString("pt-BR");
     const resultText = battle.result === "Win" ? "VITÓRIA" : "DERROTA";
-    
+
     let summary = `=== RESUMO DE BATALHA ===\n\n`;
     summary += `Oponente: ${battle.opponent_name}\n`;
     summary += `Tipo: ${battle.event_type}\n`;
@@ -485,24 +486,31 @@ export function Battles({ onNavigate }: BattlesProps) {
 
     if (battle.battle_log && battle.battle_log.matchups.length > 0) {
       battle.battle_log.matchups.forEach((matchup, index) => {
-        const myPokeName = matchup.myPokemon.nickname || matchup.myPokemon.species_name;
+        const myPokeName =
+          matchup.myPokemon.nickname || matchup.myPokemon.species_name;
         const oppPokeName = matchup.opponentPokemon.species;
-        const statusText = 
-          matchup.status === "won" ? "VENCEU" : 
-          matchup.status === "lost" ? "DERROTADO" : 
-          "TROCADO";
-        
-        const mvpMark = battle.battle_log?.mvpPokemonId === matchup.myPokemon.id ? " ⭐ MVP" : "";
-        
+        const statusText =
+          matchup.status === "won"
+            ? "VENCEU"
+            : matchup.status === "lost"
+              ? "DERROTADO"
+              : "TROCADO";
+
+        const mvpMark =
+          battle.battle_log?.mvpPokemonId === matchup.myPokemon.id
+            ? " ⭐ MVP"
+            : "";
+
         summary += `${index + 1}. ${myPokeName}${mvpMark} VS ${oppPokeName} → ${statusText}\n`;
       });
 
       if (battle.battle_log.mvpPokemonId) {
         const mvpMatchup = battle.battle_log.matchups.find(
-          m => m.myPokemon.id === battle.battle_log!.mvpPokemonId
+          (m) => m.myPokemon.id === battle.battle_log!.mvpPokemonId,
         );
         if (mvpMatchup) {
-          const mvpName = mvpMatchup.myPokemon.nickname || mvpMatchup.myPokemon.species_name;
+          const mvpName =
+            mvpMatchup.myPokemon.nickname || mvpMatchup.myPokemon.species_name;
           summary += `\n=== DESTAQUE ===\nMVP: ${mvpName}\n`;
         }
       }
@@ -611,60 +619,56 @@ export function Battles({ onNavigate }: BattlesProps) {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <button className={styles.backButton} onClick={handleGoBack}>
-            ← Voltar
-          </button>
-          <h1 className={styles.title}>📜 Diário de Batalhas</h1>
-        </div>
-        <div className={styles.headerControls}>
-          <div className={styles.filterGroup}>
-            <label htmlFor="game-filter" className={styles.filterLabel}>
-              Jogo:
-            </label>
-            <select
-              id="game-filter"
-              value={activeGameId || ""}
-              onChange={(e) => setActiveGameId(e.target.value || null)}
-              className={styles.select}
-            >
-              <option value="">Selecione um jogo</option>
-              {games.map((game) => (
-                <option key={game.id} value={game.id}>
-                  {game.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className={styles.filterGroup}>
-            <label htmlFor="opponent-filter" className={styles.filterLabel}>
-              Oponente:
-            </label>
-            <input
-              id="opponent-filter"
-              type="text"
-              placeholder="Buscar por oponente..."
-              value={opponentFilter}
-              onChange={(e) => setOpponentFilter(e.target.value)}
-              className={styles.searchInput}
-            />
-          </div>
-          <button
-            className={styles.addButton}
-            onClick={() => {
-              if (!activeGameId) {
-                alert("Selecione um jogo primeiro!");
-                return;
-              }
-              resetForm();
-              setIsFormOpen(true);
-            }}
+      <Header
+        title="📜 Diário de Batalhas"
+        showBackButton
+        onBack={handleGoBack}
+      >
+        <div className={styles.filterGroup}>
+          <label htmlFor="game-filter" className={styles.filterLabel}>
+            Jogo:
+          </label>
+          <select
+            id="game-filter"
+            value={activeGameId || ""}
+            onChange={(e) => setActiveGameId(e.target.value || null)}
+            className={styles.select}
           >
-            + Nova Batalha
-          </button>
+            <option value="">Selecione um jogo</option>
+            {games.map((game) => (
+              <option key={game.id} value={game.id}>
+                {game.name}
+              </option>
+            ))}
+          </select>
         </div>
-      </header>
+        <div className={styles.filterGroup}>
+          <label htmlFor="opponent-filter" className={styles.filterLabel}>
+            Oponente:
+          </label>
+          <input
+            id="opponent-filter"
+            type="text"
+            placeholder="Buscar por oponente..."
+            value={opponentFilter}
+            onChange={(e) => setOpponentFilter(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+        <button
+          className={styles.addButton}
+          onClick={() => {
+            if (!activeGameId) {
+              alert("Selecione um jogo primeiro!");
+              return;
+            }
+            resetForm();
+            setIsFormOpen(true);
+          }}
+        >
+          + Nova Batalha
+        </button>
+      </Header>
 
       {/* Formulário Modal */}
       {isFormOpen && (

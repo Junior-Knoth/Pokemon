@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { usePokemon } from "../context/PokemonContext";
+import { Header } from "../components/Header/Header";
 import styles from "./Dashboard.module.css";
 
 interface DashboardProps {
@@ -233,44 +234,39 @@ export function Dashboard({
 
   return (
     <div className={styles["container"]}>
-      <header className={styles["header"]}>
-        <div className={styles["headerLeft"]}>
-          <h1 className={styles["title"]}>🎮 Pokémon Database</h1>
-        </div>
-        <div className={styles["headerControls"]}>
-          <div className={styles["filterGroup"]}>
-            <label htmlFor="game-filter" className={styles["filterLabel"]}>
-              Jogo:
-            </label>
-            <select
-              id="game-filter"
-              value={activeGameId || ""}
-              onChange={(e) => setActiveGameId(e.target.value || null)}
-              className={styles["select"]}
-            >
-              <option value="">Selecione um jogo</option>
-              {games.map((game) => (
-                <option key={game.id} value={game.id}>
-                  {game.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            className={styles["newBattleButton"]}
-            onClick={() => onNavigate("battles")}
-            disabled={!activeGameId}
+      <Header title="🎮 Pokémon Database">
+        <div className={styles["filterGroup"]}>
+          <label htmlFor="game-filter" className={styles["filterLabel"]}>
+            Jogo:
+          </label>
+          <select
+            id="game-filter"
+            value={activeGameId || ""}
+            onChange={(e) => setActiveGameId(e.target.value || null)}
+            className={styles["select"]}
           >
-            ⚔️ Nova Batalha
-          </button>
-          <div className={styles["user-section"]}>
-            <span className={styles["user-email"]}>{userEmail}</span>
-            <button onClick={onSignOut} className={styles["logout-button"]}>
-              Sair
-            </button>
-          </div>
+            <option value="">Selecione um jogo</option>
+            {games.map((game) => (
+              <option key={game.id} value={game.id}>
+                {game.name}
+              </option>
+            ))}
+          </select>
         </div>
-      </header>
+        <button
+          className={styles["newBattleButton"]}
+          onClick={() => onNavigate("battles")}
+          disabled={!activeGameId}
+        >
+          ⚔️ Nova Batalha
+        </button>
+        <div className={styles["user-section"]}>
+          <span className={styles["user-email"]}>{userEmail}</span>
+          <button onClick={onSignOut} className={styles["logout-button"]}>
+            Sair
+          </button>
+        </div>
+      </Header>
 
       <main className={styles["main"]}>
         <h2 className={styles["section-title"]}>

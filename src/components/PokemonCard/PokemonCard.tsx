@@ -21,12 +21,14 @@ interface Pokemon {
 interface PokemonCardProps {
   pokemon: Pokemon;
   onToggleTeam?: (pokemonId: string) => void;
+  onDelete?: (pokemonId: string) => void;
   isInParty?: boolean;
 }
 
 export function PokemonCard({
   pokemon,
   onToggleTeam,
+  onDelete,
   isInParty = false,
 }: PokemonCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -70,6 +72,7 @@ export function PokemonCard({
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onToggleTeam={onToggleTeam}
+          onDelete={onDelete}
         />
       </>
     );
@@ -104,6 +107,7 @@ export function PokemonCard({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onToggleTeam={onToggleTeam}
+        onDelete={onDelete}
       />
     </>
   );

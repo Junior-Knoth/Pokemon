@@ -23,6 +23,7 @@ interface PokemonModalProps {
   isOpen: boolean;
   onClose: () => void;
   onToggleTeam?: (pokemonId: string) => void;
+  onDelete?: (pokemonId: string) => void;
 }
 
 interface PokemonStat {
@@ -50,6 +51,7 @@ interface EvolutionStage {
   location?: string;
   knownMove?: string;
   partySpecies?: string;
+  evolvesTo?: EvolutionStage[][]; // Array de arrays para múltiplas ramificações
 }
 
 // Mapeamento de itens de evolução
@@ -81,10 +83,17 @@ const ITEM_TRANSLATIONS: Record<string, string> = {
   "deep-sea-scale": "Escama Abissal",
   "tart-apple": "Maçã Ácida",
   "sweet-apple": "Maçã Doce",
+  "syrupy-apple": "Maçã Xaroposa",
   "cracked-pot": "Pote Rachado",
   "chipped-pot": "Pote Lascado",
   "galarica-cuff": "Bracelete Galarico",
   "galarica-wreath": "Coroa Galarica",
+  "black-augurite": "Augurita Negra",
+  "peat-block": "Bloco de Turfa",
+  "auspicious-armor": "Armadura Auspiciosa",
+  "malicious-armor": "Armadura Maliciosa",
+  "linking-cord": "Cordão de Liga",
+  "dragon-cheer": "Encorajamento Dragão",
 };
 
 const getEvolutionTrigger = (stage: EvolutionStage): string | null => {
@@ -94,7 +103,15 @@ const getEvolutionTrigger = (stage: EvolutionStage): string | null => {
 
   // Level up
   if (stage.trigger === "level-up") {
-    if (stage.minLevel) {
+    if (stage.knownMove) {
+      const moveName =
+        ITEM_TRANSLATIONS[stage.knownMove] ||
+        stage.knownMove
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+      parts.push(`Saber ${moveName}`);
+    } else if (stage.minLevel) {
       parts.push(`Nível ${stage.minLevel}`);
     } else if (stage.minHappiness) {
       parts.push(`Felicidade ${stage.minHappiness}+`);
@@ -108,8 +125,6 @@ const getEvolutionTrigger = (stage: EvolutionStage): string | null => {
       parts.push(`De dia`);
     } else if (stage.timeOfDay === "night") {
       parts.push(`À noite`);
-    } else if (stage.knownMove) {
-      parts.push(`Aprender golpe`);
     } else if (stage.partySpecies) {
       parts.push(`Com Pokémon específico`);
     } else {
@@ -194,9 +209,12 @@ export function PokemonModal({
   isOpen,
   onClose,
   onToggleTeam,
+  onDelete,
 }: PokemonModalProps) {
   const [stats, setStats] = useState<PokemonStat[]>([]);
-  const [evolutionChain, setEvolutionChain] = useState<EvolutionStage[]>([]);
+  const [evolutionChain, setEvolutionChain] = useState<EvolutionStage | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState<string>("");
   const [abilities, setAbilities] = useState<Ability[]>([]);
@@ -293,10 +311,8 @@ export function PokemonModal({
     fetchPokemonData();
   }, [isOpen, pokemon.species_name]);
 
-  const parseEvolutionChain = (chain: any): EvolutionStage[] => {
-    const stages: EvolutionStage[] = [];
-
-    const traverse = (node: any, previousDetails?: any) => {
+  const parseEvolutionChain = (chain: any): EvolutionStage => {
+    const buildStage = (node: any, previousDetails?: any): EvolutionStage => {
       const speciesName = node.species.name;
       const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getPokeIdFromUrl(node.species.url)}.png`;
 
@@ -312,7 +328,6 @@ export function PokemonModal({
       let knownMove = undefined;
       let partySpecies = undefined;
 
-      // Usar os detalhes passados (que são da evolução PARA este pokémon)
       if (previousDetails) {
         trigger = previousDetails.trigger?.name;
         minLevel = previousDetails.min_level;
@@ -325,9 +340,19 @@ export function PokemonModal({
         location = previousDetails.location?.name;
         knownMove = previousDetails.known_move?.name;
         partySpecies = previousDetails.party_species?.name;
+
+        // Debug para Hydrapple
+        if (speciesName === "hydrapple") {
+          console.log("🐉 Hydrapple evolution details:", {
+            trigger,
+            knownMove,
+            minLevel,
+            allDetails: previousDetails,
+          });
+        }
       }
 
-      stages.push({
+      const stage: EvolutionStage = {
         species: speciesName,
         sprite,
         trigger,
@@ -341,20 +366,24 @@ export function PokemonModal({
         location,
         knownMove,
         partySpecies,
-      });
+      };
 
+      // Processar TODAS as evoluções possíveis recursivamente
       if (node.evolves_to && node.evolves_to.length > 0) {
-        const nextNode = node.evolves_to[0];
-        const nextDetails =
-          nextNode.evolution_details && nextNode.evolution_details.length > 0
-            ? nextNode.evolution_details[0]
-            : undefined;
-        traverse(nextNode, nextDetails);
+        stage.evolvesTo = node.evolves_to.map((evolution: any) => {
+          const details =
+            evolution.evolution_details &&
+            evolution.evolution_details.length > 0
+              ? evolution.evolution_details[0]
+              : undefined;
+          return [buildStage(evolution, details)];
+        });
       }
+
+      return stage;
     };
 
-    traverse(chain);
-    return stages;
+    return buildStage(chain);
   };
 
   const getPokeIdFromUrl = (url: string): string => {
@@ -378,6 +407,53 @@ export function PokemonModal({
     if (e.target === e.currentTarget) {
       onClose();
     }
+  };
+
+  // Função recursiva para renderizar árvore evolutiva
+  const renderEvolutionStage = (stage: EvolutionStage): JSX.Element => {
+    const requirement = getEvolutionTrigger(stage);
+    const hasEvolutions = stage.evolvesTo && stage.evolvesTo.length > 0;
+
+    return (
+      <div className={styles["evolution-node"]}>
+        {/* Pokemon atual */}
+        <div className={styles["evolution-stage"]}>
+          <div
+            className={`${styles["evolution-sprite"]} ${
+              stage.species === pokemon.species_name ? styles["current"] : ""
+            }`}
+          >
+            <img src={stage.sprite} alt={stage.species} />
+          </div>
+          <span className={styles["evolution-name"]}>{stage.species}</span>
+          {requirement && (
+            <span className={styles["evolution-requirement"]}>
+              {requirement}
+            </span>
+          )}
+        </div>
+
+        {/* Evoluções recursivas */}
+        {hasEvolutions && (
+          <>
+            <div className={styles["evolution-connector"]}>
+              <div className={styles["evolution-line"]} />
+            </div>
+            <div className={styles["evolution-branches"]}>
+              {stage.evolvesTo!.map((branch, branchIndex) => (
+                <div key={branchIndex} className={styles["evolution-branch"]}>
+                  {branch.map((nextStage, stageIndex) => (
+                    <div key={stageIndex}>
+                      {renderEvolutionStage(nextStage)}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -647,63 +723,46 @@ export function PokemonModal({
           )}
 
           {/* Evolution Chain */}
-          {evolutionChain.length > 1 && (
+          {evolutionChain && (
             <div className={styles["section"]}>
               <h3 className={styles["section-title"]}>🔄 Linha Evolutiva</h3>
               <div className={styles["evolution-chain"]}>
-                {evolutionChain.map((stage, index) => (
-                  <>
-                    <div
-                      key={stage.species}
-                      className={styles["evolution-stage"]}
-                    >
-                      <div
-                        className={`${styles["evolution-sprite"]} ${
-                          stage.species === pokemon.species_name
-                            ? styles["current"]
-                            : ""
-                        }`}
-                      >
-                        <img src={stage.sprite} alt={stage.species} />
-                      </div>
-                      <span className={styles["evolution-name"]}>
-                        {stage.species}
-                      </span>
-                    </div>
-                    {index < evolutionChain.length - 1 && (
-                      <div
-                        key={`connector-${index}`}
-                        className={styles["evolution-connector"]}
-                      >
-                        <div className={styles["evolution-line"]} />
-                        {(() => {
-                          const nextStage = evolutionChain[index + 1];
-                          const requirement = getEvolutionTrigger(nextStage);
-                          return requirement ? (
-                            <span className={styles["evolution-requirement"]}>
-                              {requirement}
-                            </span>
-                          ) : null;
-                        })()}
-                      </div>
-                    )}
-                  </>
-                ))}
+                {renderEvolutionStage(evolutionChain)}
               </div>
             </div>
           )}
 
-          {onToggleTeam && (
-            <button
-              onClick={() => {
-                onToggleTeam(pokemon.id);
-                onClose();
-              }}
-              className={styles["action-button"]}
-            >
-              {pokemon.is_active ? "← Mover para Box" : "→ Adicionar ao Time"}
-            </button>
-          )}
+          <div className={styles["action-buttons"]}>
+            {onToggleTeam && (
+              <button
+                onClick={() => {
+                  onToggleTeam(pokemon.id);
+                  onClose();
+                }}
+                className={styles["action-button"]}
+              >
+                {pokemon.is_active ? "← Mover para Box" : "→ Adicionar ao Time"}
+              </button>
+            )}
+
+            {onDelete && (
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Tem certeza que deseja deletar ${pokemon.nickname || pokemon.species_name}?\n\nEsta ação não pode ser desfeita!`,
+                    )
+                  ) {
+                    onDelete(pokemon.id);
+                    onClose();
+                  }
+                }}
+                className={styles["delete-button"]}
+              >
+                🗑️ Deletar Pokémon
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

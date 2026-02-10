@@ -3,31 +3,7 @@
   min-height: 100vh;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(74, 144, 226, 0.2);
-  border-radius: var(--border-radius);
-  backdrop-filter: blur(10px);
-  margin-bottom: var(--spacing-xl);
-  box-shadow: var(--box-shadow);
-}
-
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.headerControls {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
+/* Estilos específicos do Dashboard Header - removidos duplicados, mantém apenas personalizações */
 .filterGroup {
   display: flex;
   align-items: center;
