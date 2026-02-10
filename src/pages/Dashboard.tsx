@@ -68,9 +68,7 @@ export function Dashboard({
   }, []);
 
   useEffect(() => {
-    if (activeGameId) {
-      loadDashboardData();
-    }
+    loadDashboardData();
   }, [activeGameId]);
 
   const loadGames = async () => {
@@ -85,11 +83,6 @@ export function Dashboard({
     }
 
     setGames(data || []);
-
-    // Se não houver jogo ativo e houver jogos, selecionar o primeiro
-    if (!activeGameId && data && data.length > 0) {
-      setActiveGameId(data[0].id);
-    }
   };
 
   const loadDashboardData = async () => {
@@ -109,12 +102,13 @@ export function Dashboard({
   };
 
   const loadBattleStats = async () => {
-    if (!activeGameId) return;
+    let query = supabase.from("battles").select("result");
 
-    const { data: battles, error } = await supabase
-      .from("battles")
-      .select("result")
-      .eq("game_id", activeGameId);
+    if (activeGameId) {
+      query = query.eq("game_id", activeGameId);
+    }
+
+    const { data: battles, error } = await query;
 
     if (error) {
       console.error("Erro ao carregar estatísticas:", error);
@@ -130,10 +124,8 @@ export function Dashboard({
   };
 
   const loadTopPokemon = async () => {
-    if (!activeGameId) return;
-
-    // Buscar participações em batalhas vitóriosas do jogo ativo
-    const { data, error } = await supabase
+    // Buscar participações em batalhas vitóriosas do jogo ativo ou todos os jogos
+    let query = supabase
       .from("battle_participation")
       .select(
         `
@@ -142,8 +134,13 @@ export function Dashboard({
         battle:battles!inner(result, game_id)
       `,
       )
-      .eq("battle.result", "Win")
-      .eq("battle.game_id", activeGameId);
+      .eq("battle.result", "Win");
+
+    if (activeGameId) {
+      query = query.eq("battle.game_id", activeGameId);
+    }
+
+    const { data, error } = await query;
 
     if (error || !data) {
       console.error("Erro ao carregar top pokemon:", error);
@@ -181,12 +178,15 @@ export function Dashboard({
   };
 
   const loadTypeDistribution = async () => {
-    if (!activeGameId) return;
-
-    const { data: pokemons, error } = await supabase
+    let query = supabase
       .from("pokemons")
-      .select("primary_type, secondary_type")
-      .eq("game_id", activeGameId);
+      .select("primary_type, secondary_type");
+
+    if (activeGameId) {
+      query = query.eq("game_id", activeGameId);
+    }
+
+    const { data: pokemons, error } = await query;
 
     if (error || !pokemons) {
       console.error("Erro ao carregar tipos:", error);
@@ -213,14 +213,17 @@ export function Dashboard({
   };
 
   const loadRecentBattles = async () => {
-    if (!activeGameId) return;
-
-    const { data, error } = await supabase
+    let query = supabase
       .from("battles")
       .select("id, opponent_name, result, battle_date, event_type")
-      .eq("game_id", activeGameId)
       .order("battle_date", { ascending: false })
       .limit(3);
+
+    if (activeGameId) {
+      query = query.eq("game_id", activeGameId);
+    }
+
+    const { data, error } = await query;
 
     if (error || !data) {
       console.error("Erro ao carregar batalhas recentes:", error);
@@ -234,218 +237,106 @@ export function Dashboard({
 
   return (
     <div className={styles["container"]}>
-      <Header title="🎮 Pokémon Database">
-        <div className={styles["filterGroup"]}>
-          <label htmlFor="game-filter" className={styles["filterLabel"]}>
-            Jogo:
-          </label>
-          <select
-            id="game-filter"
-            value={activeGameId || ""}
-            onChange={(e) => setActiveGameId(e.target.value || null)}
-            className={styles["select"]}
-          >
-            <option value="">Selecione um jogo</option>
-            {games.map((game) => (
-              <option key={game.id} value={game.id}>
-                {game.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <Header title="Dashboard">
         <button
-          className={styles["newBattleButton"]}
+          className="btn-header-primary"
           onClick={() => onNavigate("battles")}
-          disabled={!activeGameId}
         >
           ⚔️ Nova Batalha
         </button>
-        <div className={styles["user-section"]}>
-          <span className={styles["user-email"]}>{userEmail}</span>
-          <button onClick={onSignOut} className={styles["logout-button"]}>
-            Sair
-          </button>
-        </div>
       </Header>
 
       <main className={styles["main"]}>
-        <h2 className={styles["section-title"]}>
-          📊 Dashboard de Estatísticas
-        </h2>
-
         {isLoading ? (
-          <div className={styles["loading"]}>Carregando estatísticas...</div>
-        ) : !activeGameId ? (
-          <div className={styles["emptyState"]}>
-            <p>🎮 Selecione um jogo no cabeçalho para ver suas estatísticas</p>
-          </div>
+          <div className={styles["loading"]}>Carregando...</div>
         ) : (
           <>
-            {/* Estatísticas Gerais */}
-            <div className={styles["stats-grid"]}>
-              <div className={styles["stat-card"]}>
-                <div className={styles["stat-icon"]}>⚔️</div>
-                <div className={styles["stat-content"]}>
-                  <div className={styles["stat-value"]}>
+            {/* Log de Estatísticas Compacto */}
+            <div className={styles["log-section"]}>
+              <h3 className={styles["log-title"]}>📊 Resumo</h3>
+              <div className={styles["log-container"]}>
+                <div className={styles["log-row"]}>
+                  <span className={styles["log-label"]}>⚔️ Batalhas</span>
+                  <span className={styles["log-value"]}>
                     {stats.totalBattles}
-                  </div>
-                  <div className={styles["stat-label"]}>Total de Batalhas</div>
+                  </span>
                 </div>
-              </div>
-
-              <div className={styles["stat-card"]}>
-                <div className={styles["stat-icon"]}>📈</div>
-                <div className={styles["stat-content"]}>
-                  <div className={styles["stat-value"]}>
+                <div className={styles["log-row"]}>
+                  <span className={styles["log-label"]}>✅ Vitórias</span>
+                  <span className={styles["log-value"]}>{stats.wins}</span>
+                </div>
+                <div className={styles["log-row"]}>
+                  <span className={styles["log-label"]}>❌ Derrotas</span>
+                  <span className={styles["log-value"]}>{stats.losses}</span>
+                </div>
+                <div className={styles["log-row"]}>
+                  <span className={styles["log-label"]}>📈 Win Rate</span>
+                  <span className={styles["log-value"]}>
                     {stats.winRate.toFixed(1)}%
-                  </div>
-                  <div className={styles["stat-label"]}>
-                    Win Rate ({stats.wins}W / {stats.losses}L)
-                  </div>
+                  </span>
                 </div>
-              </div>
-
-              <div className={styles["stat-card"]}>
-                <div className={styles["stat-icon"]}>🏆</div>
-                <div className={styles["stat-content"]}>
-                  {topPokemon ? (
-                    <>
-                      <div className={styles["hero-pokemon"]}>
-                        <img
-                          src={topPokemon.sprite_url}
-                          alt={topPokemon.nickname || topPokemon.species_name}
-                          className={styles["hero-sprite"]}
-                        />
-                        <div>
-                          <div className={styles["hero-name"]}>
-                            {topPokemon.nickname || topPokemon.species_name}
-                          </div>
-                          <div className={styles["hero-wins"]}>
-                            {topPokemon.wins} vitórias
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles["stat-label"]}>Herói do Time</div>
-                    </>
-                  ) : (
-                    <div className={styles["stat-label"]}>Sem dados ainda</div>
-                  )}
-                </div>
+                {topPokemon && (
+                  <div className={styles["log-row"]}>
+                    <span className={styles["log-label"]}>🏆 Herói</span>
+                    <span className={styles["log-value"]}>
+                      <img
+                        src={topPokemon.sprite_url}
+                        alt={topPokemon.nickname}
+                        className={styles["log-sprite"]}
+                      />
+                      {topPokemon.nickname || topPokemon.species_name} (
+                      {topPokemon.wins}W)
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Gráfico de Tipos */}
+            {/* Log de Tipos */}
             {typeDistribution.length > 0 && (
-              <div className={styles["chart-section"]}>
-                <h3 className={styles["chart-title"]}>
-                  🎨 Distribuição de Tipos
-                </h3>
-                <div className={styles["type-chart"]}>
+              <div className={styles["log-section"]}>
+                <h3 className={styles["log-title"]}>🎨 Tipos</h3>
+                <div className={styles["log-container"]}>
                   {typeDistribution.map((item) => (
-                    <div key={item.type} className={styles["type-bar-wrapper"]}>
-                      <div className={styles["type-label"]}>{item.type}</div>
-                      <div className={styles["type-bar-container"]}>
-                        <div
-                          className={styles["type-bar"]}
-                          style={{
-                            width: `${(item.count / maxTypeCount) * 100}%`,
-                          }}
-                        >
-                          <span className={styles["type-count"]}>
-                            {item.count}
-                          </span>
-                        </div>
-                      </div>
+                    <div key={item.type} className={styles["log-row"]}>
+                      <span className={styles["log-label"]}>{item.type}</span>
+                      <span className={styles["log-value"]}>{item.count}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Feed de Batalhas Recentes */}
+            {/* Log de Batalhas Recentes */}
             {recentBattles.length > 0 && (
-              <div className={styles["recent-section"]}>
-                <h3 className={styles["recent-title"]}>📜 Batalhas Recentes</h3>
-                <div className={styles["recent-battles"]}>
+              <div className={styles["log-section"]}>
+                <h3 className={styles["log-title"]}>📜 Batalhas Recentes</h3>
+                <div className={styles["log-container"]}>
                   {recentBattles.map((battle) => (
-                    <div key={battle.id} className={styles["recent-battle"]}>
-                      <div className={styles["battle-info"]}>
-                        <div className={styles["battle-opponent"]}>
-                          {battle.event_type === "Gym" && "🏛️"}
-                          {battle.event_type === "Rival" && "⚔️"}
-                          {battle.event_type === "Elite Four" && "👑"}
-                          {battle.event_type === "Lore" && "📖"}
-                          {" " + battle.opponent_name}
-                        </div>
-                        <div className={styles["battle-date"]}>
-                          {new Date(battle.battle_date).toLocaleDateString(
-                            "pt-BR",
-                          )}
-                        </div>
-                      </div>
-                      <div
-                        className={`${styles["battle-result"]} ${
-                          styles[battle.result.toLowerCase()]
-                        }`}
+                    <div key={battle.id} className={styles["log-row"]}>
+                      <span className={styles["log-label"]}>
+                        {battle.event_type === "Gym" && "🏛️"}
+                        {battle.event_type === "Rival" && "⚔️"}
+                        {battle.event_type === "Elite Four" && "👑"}
+                        {battle.event_type === "Lore" && "📖"}
+                        {" " + battle.opponent_name}
+                      </span>
+                      <span
+                        className={`${styles["log-value"]} ${styles[battle.result.toLowerCase()]}`}
                       >
-                        {battle.result === "Win" ? "✅ Vitória" : "❌ Derrota"}
-                      </div>
+                        {battle.result === "Win" ? "✅" : "❌"}
+                      </span>
                     </div>
                   ))}
-                </div>
-                <button
-                  onClick={() => onNavigate("battles")}
-                  className={styles["view-all-button"]}
-                >
-                  Ver Todas as Batalhas →
-                </button>
-              </div>
-            )}
-
-            {/* Cards de Navegação */}
-            <div className={styles["nav-section"]}>
-              <h3 className={styles["nav-title"]}>⚡ Acesso Rápido</h3>
-              <div className={styles["cards-grid"]}>
-                <div className={styles["card"]}>
-                  <h3 className={styles["card-title"]}>Meus Jogos</h3>
-                  <p className={styles["card-description"]}>
-                    Gerencie seus jogos Pokémon
-                  </p>
-                  <button
-                    onClick={() => onNavigate("games")}
-                    className={`${styles["card-button"]} ${styles["primary"]}`}
-                  >
-                    Ver Jogos
-                  </button>
-                </div>
-
-                <div className={styles["card"]}>
-                  <h3 className={styles["card-title"]}>Meus Pokémon</h3>
-                  <p className={styles["card-description"]}>
-                    Visualize sua coleção
-                  </p>
-                  <button
-                    onClick={() => onNavigate("pokemons")}
-                    className={`${styles["card-button"]} ${styles["success"]}`}
-                  >
-                    Ver Pokémon
-                  </button>
-                </div>
-
-                <div className={styles["card"]}>
-                  <h3 className={styles["card-title"]}>Batalhas</h3>
-                  <p className={styles["card-description"]}>
-                    Registre suas batalhas épicas
-                  </p>
                   <button
                     onClick={() => onNavigate("battles")}
-                    className={`${styles["card-button"]} ${styles["warning"]}`}
+                    className={styles["log-button"]}
                   >
-                    Ver Batalhas
+                    Ver Todas →
                   </button>
                 </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </main>

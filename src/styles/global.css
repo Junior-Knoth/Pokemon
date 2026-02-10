@@ -57,3 +57,101 @@ select {
   font-family: inherit;
   font-size: 1rem;
 }
+
+/* Botões Padrão para Headers */
+.btn-header-primary {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #4a90e2 0%, #2c5aa0 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+  white-space: nowrap;
+}
+
+.btn-header-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #357abd 0%, #1e4278 100%);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-header-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(74, 144, 226, 0.3);
+}
+
+.btn-header-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-header-secondary {
+  padding: 0.5rem 1rem;
+  background: rgba(74, 144, 226, 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-header-secondary:hover:not(:disabled) {
+  background: rgba(74, 144, 226, 0.2);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.btn-header-secondary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-header-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Selects Padrão */
+.select-default {
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.select-default:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(74, 144, 226, 0.5);
+}
+
+.select-default:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.select-default:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.select-default option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.5rem;
+}

@@ -10,3 +10,14 @@
   color: var(--text-secondary);
   font-size: 1.2rem;
 }
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 60px;
+  transition: margin-left 0.3s ease;
+}

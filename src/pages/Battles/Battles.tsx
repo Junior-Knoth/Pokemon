@@ -131,18 +131,12 @@ export function Battles({ onNavigate }: BattlesProps) {
   // Carregar Pokémon do jogo atual
   useEffect(() => {
     console.log("Active Game ID:", activeGameId);
-    if (activeGameId) {
-      loadGamePokemons();
-    } else {
-      setGamePokemons([]);
-    }
+    loadGamePokemons();
   }, [activeGameId]);
 
   // Carregar batalhas do jogo atual
   useEffect(() => {
-    if (activeGameId) {
-      loadBattles();
-    }
+    loadBattles();
   }, [activeGameId]);
 
   const fetchGames = async () => {
@@ -165,16 +159,16 @@ export function Battles({ onNavigate }: BattlesProps) {
   };
 
   const loadGamePokemons = async () => {
-    if (!activeGameId) {
-      setGamePokemons([]);
-      return;
-    }
-
-    const { data, error } = await supabase
+    let query = supabase
       .from("pokemons")
       .select("id, nickname, species_name, sprite_url")
-      .eq("game_id", activeGameId)
       .order("nickname");
+
+    if (activeGameId) {
+      query = query.eq("game_id", activeGameId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Erro ao carregar Pokémon:", error);
@@ -186,9 +180,7 @@ export function Battles({ onNavigate }: BattlesProps) {
   };
 
   const loadBattles = async () => {
-    if (!activeGameId) return;
-
-    const { data, error } = await supabase
+    let query = supabase
       .from("battles")
       .select(
         `
@@ -210,8 +202,13 @@ export function Battles({ onNavigate }: BattlesProps) {
         )
       `,
       )
-      .eq("game_id", activeGameId)
       .order("battle_date", { ascending: false });
+
+    if (activeGameId) {
+      query = query.eq("game_id", activeGameId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Erro ao carregar batalhas:", error);
@@ -632,7 +629,7 @@ export function Battles({ onNavigate }: BattlesProps) {
             id="game-filter"
             value={activeGameId || ""}
             onChange={(e) => setActiveGameId(e.target.value || null)}
-            className={styles.select}
+            className="select-default"
           >
             <option value="">Selecione um jogo</option>
             {games.map((game) => (
@@ -656,7 +653,7 @@ export function Battles({ onNavigate }: BattlesProps) {
           />
         </div>
         <button
-          className={styles.addButton}
+          className="btn-header-primary"
           onClick={() => {
             if (!activeGameId) {
               alert("Selecione um jogo primeiro!");
@@ -726,6 +723,7 @@ export function Battles({ onNavigate }: BattlesProps) {
                     id="eventType"
                     value={eventType}
                     onChange={(e) => setEventType(e.target.value as any)}
+                    className="select-default"
                   >
                     <option value="Gym">🏛️ Gym</option>
                     <option value="Rival">⚔️ Rival</option>
@@ -740,6 +738,7 @@ export function Battles({ onNavigate }: BattlesProps) {
                     id="result"
                     value={result}
                     onChange={(e) => setResult(e.target.value as any)}
+                    className="select-default"
                   >
                     <option value="Win">✅ Vitória</option>
                     <option value="Loss">❌ Derrota</option>

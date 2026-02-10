@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "./hooks/useAuth";
 import { Auth } from "./components/Auth";
+import { Sidebar } from "./components/Sidebar/Sidebar";
 import { Dashboard } from "./pages/Dashboard";
 import { Games } from "./pages/Games";
 import { Pokemons } from "./pages/Pokemons";
@@ -32,16 +33,27 @@ function App() {
 
   return (
     <PokemonProvider>
-      {currentView === "dashboard" && (
-        <Dashboard
-          userEmail={user.email || "Usuário"}
+      <div className={styles["app-layout"]}>
+        <Sidebar
+          currentView={currentView}
           onNavigate={handleNavigate}
           onSignOut={signOut}
         />
-      )}
-      {currentView === "games" && <Games onNavigate={handleNavigate} />}
-      {currentView === "pokemons" && <Pokemons onNavigate={handleNavigate} />}
-      {currentView === "battles" && <Battles onNavigate={handleNavigate} />}
+        <main className={styles["main-content"]}>
+          {currentView === "dashboard" && (
+            <Dashboard
+              userEmail={user.email || "Usuário"}
+              onNavigate={handleNavigate}
+              onSignOut={signOut}
+            />
+          )}
+          {currentView === "games" && <Games onNavigate={handleNavigate} />}
+          {currentView === "pokemons" && (
+            <Pokemons onNavigate={handleNavigate} />
+          )}
+          {currentView === "battles" && <Battles onNavigate={handleNavigate} />}
+        </main>
+      </div>
     </PokemonProvider>
   );
 }

@@ -425,7 +425,7 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
             id="game-filter"
             value={activeGameId || ""}
             onChange={(e) => setActiveGameId(e.target.value || null)}
-            className={styles["select"]}
+            className="select-default"
           >
             <option value="">Todos os jogos</option>
             {games.map((game) => (
@@ -437,13 +437,13 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
         </div>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className={styles["add-button"]}
+          className="btn-header-primary"
         >
           + Adicionar Pokémon
         </button>
         <button
           onClick={exportPokemonList}
-          className={styles["export-button"]}
+          className="btn-header-secondary"
           title="Exportar lista completa de Pokémons"
         >
           📥 Exportar Lista
@@ -640,7 +640,7 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
                 <button
                   type="submit"
                   disabled={submitting || !pokemonPreview || games.length === 0}
-                  className={`${styles["button"]} ${styles["primary"]}`}
+                  className="btn-header-primary"
                 >
                   {submitting ? "Adicionando..." : "Adicionar Pokémon"}
                 </button>
@@ -656,14 +656,14 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
                     setPokemonPreview(null);
                   }}
                   disabled={submitting}
-                  className={`${styles["button"]} ${styles["secondary"]}`}
+                  className="btn-header-secondary"
                 >
                   Limpar
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className={`${styles["button"]} ${styles["secondary"]}`}
+                  className="btn-header-secondary"
                 >
                   Cancelar
                 </button>

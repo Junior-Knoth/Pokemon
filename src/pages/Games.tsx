@@ -183,7 +183,7 @@ export function Games({ onNavigate }: GamesProps) {
                   value={formData.region}
                   onChange={handleInputChange}
                   disabled={submitting}
-                  className={styles["input"]}
+                  className="select-default"
                 >
                   <option value="">-- Selecionar região --</option>
                   {REGIONS.map((r) => (
@@ -204,7 +204,7 @@ export function Games({ onNavigate }: GamesProps) {
                   value={formData.platform}
                   onChange={handleInputChange}
                   disabled={submitting}
-                  className={styles["input"]}
+                  className="select-default"
                 >
                   <option value="">-- Selecionar plataforma --</option>
                   {PLATFORMS.map((p) => (
@@ -220,7 +220,7 @@ export function Games({ onNavigate }: GamesProps) {
               <button
                 type="submit"
                 disabled={submitting}
-                className={`${styles["button"]} ${styles["primary"]}`}
+                className="btn-header-primary"
               >
                 {submitting ? "Adicionando..." : "Adicionar Jogo"}
               </button>
@@ -230,7 +230,7 @@ export function Games({ onNavigate }: GamesProps) {
                   setFormData({ name: "", region: "", platform: "" })
                 }
                 disabled={submitting}
-                className={`${styles["button"]} ${styles["secondary"]}`}
+                className="btn-header-secondary"
               >
                 Limpar
               </button>
