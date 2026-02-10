@@ -78,24 +78,7 @@
   font-size: 0.9rem;
 }
 
-/* Input e Select removidos - usando classes do global.css */
-.input {
-  padding: var(--spacing-sm);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 76, 202, 0.1);
-}
-
-.input:disabled {
-  background-color: var(--bg-secondary);
-  cursor: not-allowed;
-}
+/* Input e Select removidos - usando .input-default e .select-default do global.css */
 
 .species-group {
   display: flex;

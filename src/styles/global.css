@@ -155,3 +155,37 @@ select {
   color: var(--text-primary);
   padding: 0.5rem;
 }
+
+/* Inputs de Texto Padrão */
+.input-default {
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-default::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.input-default:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(74, 144, 226, 0.5);
+}
+
+.input-default:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.input-default:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.02);
+}

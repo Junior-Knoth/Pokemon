@@ -58,7 +58,8 @@ export function Auth() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="seu@email.com"
             disabled={loading}
-            className={styles["input"]}
+            className="input-default"
+            style={{ width: "100%" }}
           />
         </div>
 
@@ -73,7 +74,8 @@ export function Auth() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Sua senha"
             disabled={loading}
-            className={styles["input"]}
+            className="input-default"
+            style={{ width: "100%" }}
           />
         </div>
 

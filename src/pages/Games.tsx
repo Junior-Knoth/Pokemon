@@ -140,11 +140,7 @@ export function Games({ onNavigate }: GamesProps) {
 
   return (
     <div className={styles["container"]}>
-      <Header
-        title="Meus Jogos Pokémon"
-        showBackButton
-        onBack={() => onNavigate("dashboard")}
-      />
+      <Header title="Meus Jogos Pokémon" />
 
       <main className={styles["main"]}>
         {/* Formulário para adicionar jogo */}
@@ -168,7 +164,7 @@ export function Games({ onNavigate }: GamesProps) {
                   onChange={handleInputChange}
                   placeholder="Ex: Pokémon Sword"
                   disabled={submitting}
-                  className={styles["input"]}
+                  className="input-default"
                   required
                 />
               </div>

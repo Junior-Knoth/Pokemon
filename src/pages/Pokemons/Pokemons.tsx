@@ -412,29 +412,7 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
 
   return (
     <div className={styles["container"]}>
-      <Header
-        title="Meus Pokémon"
-        showBackButton
-        onBack={() => onNavigate("dashboard")}
-      >
-        <div className={styles["filter-group"]}>
-          <label htmlFor="game-filter" className={styles["filter-label"]}>
-            Filtrar por jogo:
-          </label>
-          <select
-            id="game-filter"
-            value={activeGameId || ""}
-            onChange={(e) => setActiveGameId(e.target.value || null)}
-            className="select-default"
-          >
-            <option value="">Todos os jogos</option>
-            {games.map((game) => (
-              <option key={game.id} value={game.id}>
-                {game.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <Header title="Meus Pokémon">
         <button
           onClick={() => setIsAddModalOpen(true)}
           className="btn-header-primary"
@@ -529,7 +507,7 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
                     onChange={handleInputChange}
                     placeholder="Ex: Freddie"
                     disabled={submitting}
-                    className={styles["input"]}
+                    className="input-default"
                     required
                   />
                 </div>
@@ -546,7 +524,7 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
                     onChange={handleInputChange}
                     placeholder="Ex: Route 4"
                     disabled={submitting}
-                    className={styles["input"]}
+                    className="input-default"
                   />
                 </div>
 
@@ -563,7 +541,7 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
                       onChange={handleInputChange}
                       placeholder="Ex: toxtricity, pikachu, charizard"
                       disabled={submitting}
-                      className={`${styles["input"]} ${styles["species-input"]}`}
+                      className="input-default"
                       required
                     />
                     <button

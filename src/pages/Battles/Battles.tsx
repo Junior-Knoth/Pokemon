@@ -616,29 +616,7 @@ export function Battles({ onNavigate }: BattlesProps) {
 
   return (
     <div className={styles.container}>
-      <Header
-        title="📜 Diário de Batalhas"
-        showBackButton
-        onBack={handleGoBack}
-      >
-        <div className={styles.filterGroup}>
-          <label htmlFor="game-filter" className={styles.filterLabel}>
-            Jogo:
-          </label>
-          <select
-            id="game-filter"
-            value={activeGameId || ""}
-            onChange={(e) => setActiveGameId(e.target.value || null)}
-            className="select-default"
-          >
-            <option value="">Selecione um jogo</option>
-            {games.map((game) => (
-              <option key={game.id} value={game.id}>
-                {game.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <Header title="📜 Diário de Batalhas">
         <div className={styles.filterGroup}>
           <label htmlFor="opponent-filter" className={styles.filterLabel}>
             Oponente:
@@ -649,7 +627,7 @@ export function Battles({ onNavigate }: BattlesProps) {
             placeholder="Buscar por oponente..."
             value={opponentFilter}
             onChange={(e) => setOpponentFilter(e.target.value)}
-            className={styles.searchInput}
+            className="input-default"
           />
         </div>
         <button
@@ -714,6 +692,7 @@ export function Battles({ onNavigate }: BattlesProps) {
                     onChange={(e) => setOpponentName(e.target.value)}
                     required
                     placeholder="Ex: Brock, Gary, Lance..."
+                    className="input-default"
                   />
                 </div>
 
@@ -754,31 +733,45 @@ export function Battles({ onNavigate }: BattlesProps) {
                     type="button"
                     className={styles.addMatchupButton}
                     onClick={addMatchup}
+                    title="Adicionar Matchup"
                   >
-                    + Adicionar Matchup
+                    +
                   </button>
                 </div>
 
                 <div className={styles.matchupsList}>
                   {matchups.map((matchup, index) => (
-                    <div key={matchup.id} className={styles.matchupRow}>
-                      <span className={styles.matchupNumber}>#{index + 1}</span>
-
-                      {/* Botão MVP - Movido para a esquerda */}
-                      {matchup.myPokemon && (
-                        <button
-                          type="button"
-                          className={`${styles.mvpButton} ${
-                            mvpPokemonId === matchup.myPokemon.id
-                              ? styles.mvpActive
-                              : ""
-                          }`}
-                          onClick={() => toggleMvp(matchup.myPokemon!.id)}
-                          title="Marcar como MVP"
-                        >
-                          ⭐
-                        </button>
-                      )}
+                    <div key={matchup.id} className={styles.matchupCard}>
+                      {/* Header do Card */}
+                      <div className={styles.matchupCardHeader}>
+                        <span className={styles.matchupNumber}>
+                          #{index + 1}
+                        </span>
+                        {matchup.myPokemon && (
+                          <button
+                            type="button"
+                            className={`${styles.mvpButton} ${
+                              mvpPokemonId === matchup.myPokemon.id
+                                ? styles.mvpActive
+                                : ""
+                            }`}
+                            onClick={() => toggleMvp(matchup.myPokemon!.id)}
+                            title="Marcar como MVP"
+                          >
+                            ⭐
+                          </button>
+                        )}
+                        {matchups.length > 1 && (
+                          <button
+                            type="button"
+                            className={styles.removeMatchupButton}
+                            onClick={() => removeMatchup(matchup.id)}
+                            title="Remover matchup"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
 
                       {/* Meu Pokémon */}
                       <div className={styles.matchupSlot}>
@@ -801,7 +794,7 @@ export function Battles({ onNavigate }: BattlesProps) {
                               className={styles.changeButton}
                               onClick={() => openPokemonSelector(matchup.id)}
                             >
-                              Trocar
+                              ↻
                             </button>
                           </div>
                         ) : (
@@ -810,7 +803,7 @@ export function Battles({ onNavigate }: BattlesProps) {
                             className={styles.selectButton}
                             onClick={() => openPokemonSelector(matchup.id)}
                           >
-                            Selecionar Meu Pokémon
+                            Selecionar
                           </button>
                         )}
                       </div>
@@ -835,15 +828,15 @@ export function Battles({ onNavigate }: BattlesProps) {
                               className={styles.changeButton}
                               onClick={() => clearOpponent(matchup.id)}
                             >
-                              Trocar
+                              ↻
                             </button>
                           </div>
                         ) : (
                           <div className={styles.opponentInputGroup}>
                             <input
                               type="text"
-                              placeholder="Nome da espécie..."
-                              className={styles.opponentInput}
+                              placeholder="Espécie..."
+                              className="input-default"
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                   e.preventDefault();
@@ -870,9 +863,9 @@ export function Battles({ onNavigate }: BattlesProps) {
                         )}
                       </div>
 
-                      {/* Status do Matchup - Movido para o lado direito */}
+                      {/* Status do Matchup */}
                       {matchup.myPokemon && matchup.opponentPokemon && (
-                        <div className={styles.statusSelectorRight}>
+                        <div className={styles.statusSelector}>
                           <button
                             type="button"
                             className={`${styles.statusButton} ${
@@ -910,18 +903,6 @@ export function Battles({ onNavigate }: BattlesProps) {
                             🔄
                           </button>
                         </div>
-                      )}
-
-                      {/* Botão Remover */}
-                      {matchups.length > 1 && (
-                        <button
-                          type="button"
-                          className={styles.removeMatchupButton}
-                          onClick={() => removeMatchup(matchup.id)}
-                          title="Remover matchup"
-                        >
-                          🗑️
-                        </button>
                       )}
                     </div>
                   ))}
@@ -983,7 +964,8 @@ export function Battles({ onNavigate }: BattlesProps) {
                   placeholder="Buscar por apelido ou espécie..."
                   value={pokemonSearchQuery}
                   onChange={(e) => setPokemonSearchQuery(e.target.value)}
-                  className={styles.searchInput}
+                  className="input-default"
+                  style={{ width: "100%" }}
                   autoFocus
                 />
               </div>
