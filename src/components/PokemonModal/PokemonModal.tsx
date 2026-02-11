@@ -24,6 +24,7 @@ interface PokemonModalProps {
   onClose: () => void;
   onToggleTeam?: (pokemonId: string) => void;
   onDelete?: (pokemonId: string) => void;
+  onEvolve?: (pokemon: Pokemon) => void;
 }
 
 interface PokemonStat {
@@ -210,6 +211,7 @@ export function PokemonModal({
   onClose,
   onToggleTeam,
   onDelete,
+  onEvolve,
 }: PokemonModalProps) {
   const [stats, setStats] = useState<PokemonStat[]>([]);
   const [evolutionChain, setEvolutionChain] = useState<EvolutionStage | null>(
@@ -504,6 +506,38 @@ export function PokemonModal({
                 )}
               </div>
             )}
+
+            <div className={styles["header-metadata"]}>
+              {pokemon.game && (
+                <div className={styles["meta-badge"]}>
+                  <span className={styles["meta-icon"]}>🎮</span>
+                  <span className={styles["meta-label"]}>Jogo:</span>
+                  <span className={styles["meta-value"]}>
+                    {pokemon.game.name}
+                  </span>
+                </div>
+              )}
+              <div className={styles["meta-badge"]}>
+                <span className={styles["meta-icon"]}>📅</span>
+                <span className={styles["meta-label"]}>Status:</span>
+                <span
+                  className={`${styles["status-badge"]} ${
+                    pokemon.is_active
+                      ? styles["status-active"]
+                      : styles["status-inactive"]
+                  }`}
+                >
+                  {pokemon.is_active ? "No time" : "Na box"}
+                </span>
+              </div>
+              <div className={styles["meta-badge"]}>
+                <span className={styles["meta-icon"]}>🕐</span>
+                <span className={styles["meta-label"]}>Adicionado:</span>
+                <span className={styles["meta-value"]}>
+                  {formatDate(pokemon.created_at)}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -514,45 +548,16 @@ export function PokemonModal({
         )}
 
         <div className={styles["modal-body"]}>
-          <div className={styles["info-grid"]}>
-            {pokemon.game && (
-              <div className={styles["info-item"]}>
-                <span className={styles["info-label"]}>🎮 Jogo:</span>
-                <span className={styles["info-value"]}>
-                  {pokemon.game.name}
-                </span>
-              </div>
-            )}
-
-            {pokemon.caught_at && (
+          {pokemon.caught_at && (
+            <div className={styles["info-grid"]}>
               <div className={styles["info-item"]}>
                 <span className={styles["info-label"]}>📍 Capturado em:</span>
                 <span className={styles["info-value"]}>
                   {pokemon.caught_at}
                 </span>
               </div>
-            )}
-
-            <div className={styles["info-item"]}>
-              <span className={styles["info-label"]}>📅 Status:</span>
-              <span
-                className={`${styles["status-badge"]} ${
-                  pokemon.is_active
-                    ? styles["status-active"]
-                    : styles["status-inactive"]
-                }`}
-              >
-                {pokemon.is_active ? "No time" : "Na box"}
-              </span>
             </div>
-
-            <div className={styles["info-item"]}>
-              <span className={styles["info-label"]}>🕐 Adicionado:</span>
-              <span className={styles["info-value"]}>
-                {formatDate(pokemon.created_at)}
-              </span>
-            </div>
-          </div>
+          )}
 
           {/* Altura e Peso */}
           {(height > 0 || weight > 0) && (
@@ -742,6 +747,21 @@ export function PokemonModal({
                 className={styles["action-button"]}
               >
                 {pokemon.is_active ? "← Mover para Box" : "→ Adicionar ao Time"}
+              </button>
+            )}
+
+            {onEvolve && (
+              <button
+                onClick={() => {
+                  onEvolve(pokemon);
+                  onClose();
+                }}
+                className={styles["action-button"]}
+                style={{
+                  background: "linear-gradient(135deg, #10b981, #059669)",
+                }}
+              >
+                ⚡ Evoluir Pokémon
               </button>
             )}
 

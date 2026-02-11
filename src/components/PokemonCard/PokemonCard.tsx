@@ -22,6 +22,7 @@ interface PokemonCardProps {
   pokemon: Pokemon;
   onToggleTeam?: (pokemonId: string) => void;
   onDelete?: (pokemonId: string) => void;
+  onEvolve?: (pokemon: Pokemon) => void;
   isInParty?: boolean;
 }
 
@@ -29,6 +30,7 @@ export function PokemonCard({
   pokemon,
   onToggleTeam,
   onDelete,
+  onEvolve,
   isInParty = false,
 }: PokemonCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,6 +75,7 @@ export function PokemonCard({
           onClose={() => setIsModalOpen(false)}
           onToggleTeam={onToggleTeam}
           onDelete={onDelete}
+          onEvolve={onEvolve}
         />
       </>
     );
@@ -108,6 +111,7 @@ export function PokemonCard({
         onClose={() => setIsModalOpen(false)}
         onToggleTeam={onToggleTeam}
         onDelete={onDelete}
+        onEvolve={onEvolve}
       />
     </>
   );

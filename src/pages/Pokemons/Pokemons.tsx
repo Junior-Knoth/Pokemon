@@ -40,6 +40,14 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
   const [success, setSuccess] = useState<string>("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isEvolveModalOpen, setIsEvolveModalOpen] = useState(false);
+  const [evolvingPokemon, setEvolvingPokemon] = useState<any>(null);
+  const [possibleEvolutions, setPossibleEvolutions] = useState<any[]>([]);
+  const [selectedEvolution, setSelectedEvolution] = useState<string>("");
+  const [evolutionPreview, setEvolutionPreview] =
+    useState<PokeAPIPokemon | null>(null);
+  const [loadingEvolutions, setLoadingEvolutions] = useState(false);
+  const [evolutionSuccess, setEvolutionSuccess] = useState(false);
 
   const [filters, setFilters] = useState({
     species: "",
@@ -287,6 +295,116 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao deletar Pokémon");
       setTimeout(() => setError(""), 5000);
+    }
+  };
+
+  const handleEvolvePokemon = async (pokemon: any) => {
+    setEvolvingPokemon(pokemon);
+    setIsEvolveModalOpen(true);
+    setLoadingEvolutions(true);
+    setPossibleEvolutions([]);
+    setSelectedEvolution("");
+    setEvolutionPreview(null);
+    setEvolutionSuccess(false);
+
+    try {
+      // Buscar cadeia de evolução na PokeAPI
+      const speciesRes = await fetch(
+        `https://pokeapi.co/api/v2/pokemon-species/${pokemon.species_name}`,
+      );
+      if (!speciesRes.ok) throw new Error("Espécie não encontrada");
+      const speciesData = await speciesRes.json();
+
+      const chainRes = await fetch(speciesData.evolution_chain.url);
+      if (!chainRes.ok) throw new Error("Cadeia de evolução não encontrada");
+      const chainData = await chainRes.json();
+
+      // Extrair evoluções possíveis
+      const evolutions: any[] = [];
+      const extractEvolutions = (chain: any, currentSpecies: string) => {
+        if (
+          chain.species.name === currentSpecies &&
+          chain.evolves_to.length > 0
+        ) {
+          chain.evolves_to.forEach((evo: any) => {
+            evolutions.push({
+              name: evo.species.name,
+              displayName:
+                evo.species.name.charAt(0).toUpperCase() +
+                evo.species.name.slice(1),
+            });
+          });
+        }
+        chain.evolves_to.forEach((evo: any) =>
+          extractEvolutions(evo, currentSpecies),
+        );
+      };
+      extractEvolutions(chainData.chain, pokemon.species_name);
+
+      if (evolutions.length === 0) {
+        setError("Este Pokémon não possui evoluções disponíveis.");
+        setTimeout(() => setError(""), 3000);
+        setIsEvolveModalOpen(false);
+      } else {
+        setPossibleEvolutions(evolutions);
+      }
+    } catch (err) {
+      setError("Erro ao buscar evoluções. Verifique o nome da espécie.");
+      setTimeout(() => setError(""), 3000);
+      setIsEvolveModalOpen(false);
+    } finally {
+      setLoadingEvolutions(false);
+    }
+  };
+
+  const handleSelectEvolution = async (evolutionName: string) => {
+    setSelectedEvolution(evolutionName);
+    try {
+      const data = await fetchPokemonFromAPI(evolutionName);
+      if (data) {
+        setEvolutionPreview(data);
+      }
+    } catch (err) {
+      setError("Erro ao buscar dados da evolução");
+    }
+  };
+
+  const confirmEvolution = async () => {
+    if (!evolutionPreview || !evolvingPokemon) return;
+
+    try {
+      const spriteUrl =
+        evolutionPreview.sprites.other?.["official-artwork"]?.front_default ||
+        evolutionPreview.sprites.front_default;
+      const type1 = evolutionPreview.types[0]?.type.name || null;
+      const type2 = evolutionPreview.types[1]?.type.name || null;
+
+      const { error: updateError } = await supabase
+        .from("pokemons")
+        .update({
+          species_name: selectedEvolution,
+          sprite_url: spriteUrl,
+          type_1: type1,
+          type_2: type2,
+        })
+        .eq("id", evolvingPokemon.id);
+
+      if (updateError) throw updateError;
+
+      setEvolutionSuccess(true);
+      await fetchPokemons(activeGameId);
+
+      setTimeout(() => {
+        setIsEvolveModalOpen(false);
+        setEvolutionSuccess(false);
+        setEvolvingPokemon(null);
+        setPossibleEvolutions([]);
+        setSelectedEvolution("");
+        setEvolutionPreview(null);
+      }, 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao evoluir Pokémon");
+      setTimeout(() => setError(""), 3000);
     }
   };
 
@@ -806,6 +924,150 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
         </div>
       )}
 
+      {/* Modal de Evolução de Pokémon */}
+      {isEvolveModalOpen && evolvingPokemon && (
+        <div
+          className={styles["modal-overlay"]}
+          onClick={() => !evolutionSuccess && setIsEvolveModalOpen(false)}
+        >
+          <div
+            className={styles["modal-content"]}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles["modal-header"]}>
+              <h2 className={styles["modal-title"]}>Evoluir Pokémon</h2>
+              {!evolutionSuccess && (
+                <button
+                  onClick={() => setIsEvolveModalOpen(false)}
+                  className={styles["modal-close"]}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <div style={{ padding: "var(--spacing-lg)" }}>
+              {evolutionSuccess ? (
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "var(--primary-color)",
+                      marginBottom: "var(--spacing-lg)",
+                    }}
+                  >
+                    Parabéns! Seu {evolvingPokemon.nickname} (
+                    {evolvingPokemon.species_name}) evoluiu para um(a){" "}
+                    {selectedEvolution}!
+                  </div>
+                  {evolutionPreview && (
+                    <img
+                      src={
+                        evolutionPreview.sprites.other?.["official-artwork"]
+                          ?.front_default ||
+                        evolutionPreview.sprites.front_default
+                      }
+                      alt={selectedEvolution}
+                      style={{
+                        width: "200px",
+                        height: "200px",
+                        imageRendering: "pixelated",
+                      }}
+                    />
+                  )}
+                </div>
+              ) : loadingEvolutions ? (
+                <div
+                  style={{ textAlign: "center", padding: "var(--spacing-xl)" }}
+                >
+                  Buscando evoluções...
+                </div>
+              ) : (
+                <>
+                  <div style={{ marginBottom: "var(--spacing-lg)" }}>
+                    <strong>Pokémon:</strong> {evolvingPokemon.nickname} (
+                    {evolvingPokemon.species_name})
+                  </div>
+
+                  <div className={styles["form-group"]}>
+                    <label className={styles["label"]}>
+                      Selecione a evolução:
+                    </label>
+                    <select
+                      value={selectedEvolution}
+                      onChange={(e) => handleSelectEvolution(e.target.value)}
+                      className="select-default"
+                    >
+                      <option value="">-- Escolha uma evolução --</option>
+                      {possibleEvolutions.map((evo) => (
+                        <option key={evo.name} value={evo.name}>
+                          {evo.displayName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {evolutionPreview && (
+                    <div className={styles["pokemon-preview"]}>
+                      <div className={styles["preview-header"]}>
+                        <img
+                          src={
+                            evolutionPreview.sprites.other?.["official-artwork"]
+                              ?.front_default ||
+                            evolutionPreview.sprites.front_default
+                          }
+                          alt={evolutionPreview.name}
+                          className={styles["preview-sprite"]}
+                        />
+                        <div className={styles["preview-info"]}>
+                          <div className={styles["preview-name"]}>
+                            {evolutionPreview.name}
+                          </div>
+                          <div className={styles["preview-types"]}>
+                            {evolutionPreview.types.map((typeInfo) => (
+                              <span
+                                key={typeInfo.type.name}
+                                className={styles["preview-type-badge"]}
+                                style={{
+                                  backgroundColor:
+                                    TYPE_COLORS[typeInfo.type.name] || "#999",
+                                }}
+                              >
+                                {typeInfo.type.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div
+                    className={styles["button-group"]}
+                    style={{ marginTop: "var(--spacing-lg)" }}
+                  >
+                    <button
+                      onClick={confirmEvolution}
+                      disabled={!selectedEvolution || !evolutionPreview}
+                      className="btn-header-primary"
+                    >
+                      Confirmar Evolução
+                    </button>
+                    <button
+                      onClick={() => setIsEvolveModalOpen(false)}
+                      className="btn-header-secondary"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className={styles["main"]}>
         {/* Lista de Pokémon - Party vs Box */}
         {loading ? (
@@ -831,6 +1093,7 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
                         pokemon={pokemon}
                         onToggleTeam={handleToggleTeam}
                         onDelete={handleDeletePokemon}
+                        onEvolve={handleEvolvePokemon}
                         isInParty={true}
                       />
                     );
@@ -909,6 +1172,7 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
                       pokemon={pokemon}
                       onToggleTeam={handleToggleTeam}
                       onDelete={handleDeletePokemon}
+                      onEvolve={handleEvolvePokemon}
                       isInParty={false}
                     />
                   ))}
