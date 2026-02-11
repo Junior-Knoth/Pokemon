@@ -18,14 +18,15 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 0;
+  width: 100%;
   height: 2px;
   background-color: var(--type-color, var(--primary-color));
-  transition: width 0.3s ease;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .card:hover::before {
-  width: 100%;
+  opacity: 1;
 }
 
 .card-header {
@@ -207,14 +208,15 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 0;
+  width: 100%;
   height: 2px;
   background-color: var(--type-color, var(--primary-color));
-  transition: width 0.3s ease;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .card-compact:hover::before {
-  width: 100%;
+  opacity: 1;
 }
 
 .sprite-compact {

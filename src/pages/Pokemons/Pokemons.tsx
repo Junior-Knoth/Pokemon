@@ -39,6 +39,16 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+  const [filters, setFilters] = useState({
+    species: "",
+    nickname: "",
+    type: "",
+  });
+  const hasFilters = Boolean(
+    filters.species || filters.nickname || filters.type,
+  );
 
   // Form state
   const [formData, setFormData] = useState({
@@ -99,6 +109,58 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
   useEffect(() => {
     setCurrentBoxPage(1);
   }, [activeGameId]);
+
+  // Reaplica filtros ao mudar a lista ou jogo
+  useEffect(() => {
+    if (filters.species || filters.nickname || filters.type) {
+      applyFilters();
+    } else {
+      if (activeGameId) {
+        setFilteredPokemons(pokemons.filter((p) => p.game_id === activeGameId));
+      } else {
+        setFilteredPokemons(pokemons);
+      }
+    }
+  }, [pokemons, activeGameId]);
+
+  const applyFilters = () => {
+    let list = pokemons.slice();
+
+    if (activeGameId) {
+      list = list.filter((p) => p.game_id === activeGameId);
+    }
+
+    if (filters.species.trim()) {
+      const q = filters.species.trim().toLowerCase();
+      list = list.filter((p) =>
+        (p.species_name || "").toLowerCase().includes(q),
+      );
+    }
+
+    if (filters.nickname.trim()) {
+      const q = filters.nickname.trim().toLowerCase();
+      list = list.filter((p) => (p.nickname || "").toLowerCase().includes(q));
+    }
+
+    if (filters.type.trim()) {
+      const t = filters.type.trim();
+      list = list.filter((p) => p.type_1 === t || p.type_2 === t);
+    }
+
+    setFilteredPokemons(list);
+    setCurrentBoxPage(1);
+    setIsFilterModalOpen(false);
+  };
+
+  const clearFilters = () => {
+    setFilters({ species: "", nickname: "", type: "" });
+    if (activeGameId) {
+      setFilteredPokemons(pokemons.filter((p) => p.game_id === activeGameId));
+    } else {
+      setFilteredPokemons(pokemons);
+    }
+    setCurrentBoxPage(1);
+  };
 
   const exportPokemonList = async () => {
     try {
@@ -651,6 +713,99 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
         </div>
       )}
 
+      {/* Modal de Filtro de Pokémon (nível superior para evitar problemas de stacking) */}
+      {isFilterModalOpen && (
+        <div
+          className={styles["modal-overlay"]}
+          onClick={() => setIsFilterModalOpen(false)}
+        >
+          <div
+            className={styles["modal-content"]}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles["modal-header"]}>
+              <h2 className={styles["modal-title"]}>Filtrar Pokémon</h2>
+              <button
+                onClick={() => setIsFilterModalOpen(false)}
+                className={styles["modal-close"]}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: "var(--spacing-lg)" }}>
+              <div className={styles["form"]}>
+                <div className={styles["form-group"]}>
+                  <label className={styles["label"]}>Nome da Espécie</label>
+                  <input
+                    value={filters.species}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        species: e.target.value,
+                      }))
+                    }
+                    placeholder="Ex: pikachu"
+                    className="input-default"
+                  />
+                </div>
+
+                <div className={styles["form-group"]}>
+                  <label className={styles["label"]}>Nickname</label>
+                  <input
+                    value={filters.nickname}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        nickname: e.target.value,
+                      }))
+                    }
+                    placeholder="Ex: Freddie"
+                    className="input-default"
+                  />
+                </div>
+
+                <div className={styles["form-group"]}>
+                  <label className={styles["label"]}>Tipo</label>
+                  <select
+                    value={filters.type}
+                    onChange={(e) =>
+                      setFilters((prev) => ({ ...prev, type: e.target.value }))
+                    }
+                    className="select-default"
+                  >
+                    <option value="">-- Qualquer tipo --</option>
+                    {Object.keys(TYPE_COLORS).map((t) => (
+                      <option key={t} value={t}>
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div
+                className={styles["button-group"]}
+                style={{ marginTop: "var(--spacing-lg)" }}
+              >
+                <button onClick={applyFilters} className="btn-header-primary">
+                  Aplicar
+                </button>
+                <button onClick={clearFilters} className="btn-header-secondary">
+                  Limpar
+                </button>
+                <button
+                  onClick={() => setIsFilterModalOpen(false)}
+                  className="btn-header-secondary"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className={styles["main"]}>
         {/* Lista de Pokémon - Party vs Box */}
         {loading ? (
@@ -696,25 +851,50 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
             {/* Box Section - Coluna Direita */}
             <main className={styles["box-main"]}>
               <div className={styles["box-header"]}>
-                <button
-                  onClick={handlePreviousPage}
-                  disabled={currentBoxPage === 1}
-                  className={styles["box-nav-button"]}
-                >
-                  ◀
-                </button>
+                <div className={styles["box-header-actions"]}>
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    disabled={!hasFilters}
+                    className="btn-header-secondary"
+                    title="Limpar filtros"
+                  >
+                    Limpar Filtros
+                  </button>
+                  <button
+                    onClick={handlePreviousPage}
+                    disabled={currentBoxPage === 1}
+                    className={styles["box-nav-button"]}
+                  >
+                    ◀
+                  </button>
+                </div>
+
                 <h3 className={styles["box-header-title"]}>
                   Box {currentBoxPage}
                 </h3>
-                <button
-                  onClick={handleNextPage}
-                  disabled={
-                    currentBoxPage === totalBoxPages || boxPokemons.length === 0
-                  }
-                  className={styles["box-nav-button"]}
-                >
-                  ▶
-                </button>
+
+                <div className={styles["box-header-actions"]}>
+                  <button
+                    onClick={handleNextPage}
+                    disabled={
+                      currentBoxPage === totalBoxPages ||
+                      boxPokemons.length === 0
+                    }
+                    className={styles["box-nav-button"]}
+                  >
+                    ▶
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsFilterModalOpen(true)}
+                    className="btn-header-secondary"
+                    title="Filtrar Pokémon"
+                  >
+                    Filtrar
+                  </button>
+                </div>
               </div>
 
               {boxPokemons.length === 0 ? (
