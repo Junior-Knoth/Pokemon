@@ -321,17 +321,36 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
 
       // Extrair evoluções possíveis
       const evolutions: any[] = [];
+
+      // Normalizar nome do Pokémon (remover sufixos de forma regional)
+      const normalizedSpecies = pokemon.species_name
+        .split("-")[0]
+        .toLowerCase();
+
       const extractEvolutions = (chain: any, currentSpecies: string) => {
+        // Comparar com o nome base (sem sufixos)
+        const chainSpeciesBase = chain.species.name.split("-")[0].toLowerCase();
+
         if (
-          chain.species.name === currentSpecies &&
+          (chainSpeciesBase === currentSpecies ||
+            chain.species.name === pokemon.species_name) &&
           chain.evolves_to.length > 0
         ) {
           chain.evolves_to.forEach((evo: any) => {
+            // Para formas regionais, usar o nome completo da espécie original
+            const evolvedName =
+              pokemon.species_name.includes("-") &&
+              !evo.species.name.includes("-")
+                ? `${evo.species.name}-${pokemon.species_name.split("-")[1]}`
+                : evo.species.name;
+
             evolutions.push({
-              name: evo.species.name,
-              displayName:
-                evo.species.name.charAt(0).toUpperCase() +
-                evo.species.name.slice(1),
+              name: evolvedName,
+              originalName: evo.species.name,
+              displayName: evolvedName
+                .split("-")
+                .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                .join(" "),
             });
           });
         }
@@ -339,14 +358,20 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
           extractEvolutions(evo, currentSpecies),
         );
       };
-      extractEvolutions(chainData.chain, pokemon.species_name);
+      extractEvolutions(chainData.chain, normalizedSpecies);
 
       if (evolutions.length === 0) {
         setError("Este Pokémon não possui evoluções disponíveis.");
         setTimeout(() => setError(""), 3000);
         setIsEvolveModalOpen(false);
-      } else {
-        setPossibleEvolutions(evolutions);
+        return;
+      }
+
+      setPossibleEvolutions(evolutions);
+
+      // Se houver apenas 1 evolução, selecionar automaticamente
+      if (evolutions.length === 1) {
+        await handleSelectEvolution(evolutions[0].name);
       }
     } catch (err) {
       setError("Erro ao buscar evoluções. Verifique o nome da espécie.");
@@ -358,14 +383,30 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
   };
 
   const handleSelectEvolution = async (evolutionName: string) => {
+    if (!evolutionName) return;
+
     setSelectedEvolution(evolutionName);
+    setEvolutionPreview(null);
+
     try {
-      const data = await fetchPokemonFromAPI(evolutionName);
+      // Tentar buscar com o nome completo primeiro
+      let data = await fetchPokemonFromAPI(evolutionName);
+
+      // Se falhar e for uma forma regional, tentar com o nome base
+      if (!data && evolutionName.includes("-")) {
+        const baseName = evolutionName.split("-")[0];
+        data = await fetchPokemonFromAPI(baseName);
+      }
+
       if (data) {
         setEvolutionPreview(data);
+      } else {
+        setError("Não foi possível carregar dados desta evolução");
+        setTimeout(() => setError(""), 3000);
       }
     } catch (err) {
       setError("Erro ao buscar dados da evolução");
+      setTimeout(() => setError(""), 3000);
     }
   };
 
@@ -588,6 +629,25 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
     if (name === "species_name") {
       setPokemonPreview(null);
     }
+  };
+
+  // Calcular contagem de tipos
+  const getTypeCount = () => {
+    const typeCount: Record<string, number> = {};
+    
+    pokemons.forEach((pokemon) => {
+      if (pokemon.type_1) {
+        typeCount[pokemon.type_1] = (typeCount[pokemon.type_1] || 0) + 1;
+      }
+      if (pokemon.type_2) {
+        typeCount[pokemon.type_2] = (typeCount[pokemon.type_2] || 0) + 1;
+      }
+    });
+    
+    // Ordenar por quantidade (maior para menor)
+    return Object.entries(typeCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([type, count]) => ({ type, count }));
   };
 
   return (
@@ -1189,6 +1249,32 @@ export function Pokemons({ onNavigate }: PokemonsProps) {
                       className={styles["box-empty-slot"]}
                     />
                   ))}
+                </div>
+              )}
+              
+              {/* Footer com contagem de tipos */}
+              {pokemons.length > 0 && (
+                <div className={styles["type-footer"]}>
+                  <div className={styles["type-footer-title"]}>
+                    Pokémon por tipo:
+                  </div>
+                  <div className={styles["type-footer-list"]}>
+                    {getTypeCount().map(({ type, count }) => (
+                      <div key={type} className={styles["type-footer-item"]}>
+                        <span
+                          className={styles["type-footer-badge"]}
+                          style={{
+                            backgroundColor: TYPE_COLORS[type] || "#999",
+                          }}
+                        >
+                          {type}
+                        </span>
+                        <span className={styles["type-footer-count"]}>
+                          {count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </main>
