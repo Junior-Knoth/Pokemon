@@ -2,13 +2,24 @@ const CACHE_NAME = "pokedash-v1";
 const STATIC_CACHE = "pokedash-static-v1";
 const DYNAMIC_CACHE = "pokedash-dynamic-v1";
 
-// Arquivos essenciais para cache
+// Determina o base path relativo ao próprio Service Worker
+const BASE_PATH = (() => {
+  try {
+    const u = new URL(self.location.href);
+    // Ex: /Pokemon/sw.js -> base /Pokemon/
+    return u.pathname.replace(/sw\.js$/, "");
+  } catch (e) {
+    return "/";
+  }
+})();
+
+// Arquivos essenciais para cache (resolvidos com BASE_PATH)
 const STATIC_ASSETS = [
-  "/",
-  "/index.html",
-  "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png",
+  BASE_PATH,
+  BASE_PATH + "index.html",
+  BASE_PATH + "manifest.json",
+  BASE_PATH + "icon-192.png",
+  BASE_PATH + "icon-512.png",
 ];
 
 // Instalação do Service Worker
@@ -126,7 +137,7 @@ self.addEventListener("fetch", (event) => {
 
           // Retorna uma página de fallback se disponível
           if (request.destination === "document") {
-            return caches.match("/index.html");
+            return caches.match(BASE_PATH + "index.html");
           }
         });
     }),
