@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "./PokemonDetail.module.css";
+import EvolutionSheet from "./EvolutionSheet";
 
 export default function PokemonDetail({ pokemon, onClose }) {
   if (!pokemon) return null;
@@ -221,6 +222,7 @@ export default function PokemonDetail({ pokemon, onClose }) {
 
   const [stats, setStats] = useState(null);
   const [evolutions, setEvolutions] = useState(null);
+  const [showEvoSheet, setShowEvoSheet] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -544,7 +546,7 @@ export default function PokemonDetail({ pokemon, onClose }) {
         </button>
         <button
           className={`${styles.dtButton} ${styles.dtPrimary}`}
-          onClick={() => {}}
+          onClick={() => setShowEvoSheet(true)}
           style={{ background: typeColors[t1] || "rgba(255,255,255,0.06)" }}
         >
           Evoluir
@@ -556,6 +558,17 @@ export default function PokemonDetail({ pokemon, onClose }) {
           Soltar
         </button>
       </div>
+      <EvolutionSheet
+        open={showEvoSheet}
+        onClose={() => setShowEvoSheet(false)}
+        pokemon={pokemon}
+        evolutions={evolutions || []}
+        onConfirmed={(updated) => {
+          console.log("Evolved", updated);
+          setShowEvoSheet(false);
+          onClose?.();
+        }}
+      />
     </div>
   );
 }

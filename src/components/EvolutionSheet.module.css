@@ -1,0 +1,148 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 260;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 1100px;
+  height: 60vh;
+  background: #0b0b0d;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  padding: 12px 16px 80px 16px;
+  box-sizing: border-box;
+  color: #e6edf3;
+  overflow-y: auto;
+}
+
+.handle {
+  width: 36px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  margin: 6px auto 10px auto;
+}
+
+.title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+}
+
+.section {
+  margin-bottom: 12px;
+}
+.sectionTitle {
+  color: #9fb0c8;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+.cardSmall {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  width: 120px;
+}
+.thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+.cardName {
+  font-size: 13px;
+  color: #e6edf3;
+}
+
+.options {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.option {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.active {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+}
+.optCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  width: 100px;
+}
+.optThumb {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+.optName {
+  font-size: 12px;
+  color: #e6edf3;
+  text-transform: capitalize;
+}
+
+.placeholder {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.note {
+  color: #9fb0c8;
+}
+
+.footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  background: linear-gradient(
+    180deg,
+    rgba(11, 11, 13, 0) 0%,
+    rgba(11, 11, 13, 1) 100%
+  );
+}
+.cancel,
+.confirm {
+  width: 48%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.confirm {
+  background: #1db954;
+  color: white;
+}
+.cancel {
+  background: rgba(255, 255, 255, 0.03);
+  color: #e6edf3;
+}
