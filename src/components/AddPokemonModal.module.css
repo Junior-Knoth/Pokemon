@@ -59,6 +59,30 @@
   gap: 8px;
   align-items: center;
 }
+.rowInline {
+  position: relative;
+}
+
+.autocompleteList {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 80px;
+  background: #0b0b0d;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  z-index: 150;
+  max-height: 200px;
+  overflow: auto;
+}
+.autocompleteItem {
+  padding: 8px 10px;
+  color: #e6edf3;
+  cursor: pointer;
+}
+.autocompleteItem:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
 .preview {
   width: 56px;
   height: 56px;

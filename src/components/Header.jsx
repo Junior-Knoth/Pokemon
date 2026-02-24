@@ -13,10 +13,8 @@ export default function Header({ selected, onSelect, onExport }) {
   useEffect(() => {
     // get initial session and games
     let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      const uid = data.session?.user?.id;
-      if (uid && mounted) fetchGames(uid);
-    });
+    // fetch all games regardless of auth so everyone can see the list
+    fetchGames();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -32,12 +30,11 @@ export default function Header({ selected, onSelect, onExport }) {
     };
   }, []);
 
-  async function fetchGames(userId) {
+  async function fetchGames() {
     setLoading(true);
     const { data, error } = await supabase
       .from("games")
       .select("id, name")
-      .eq("user_id", userId)
       .order("created_at", { ascending: true });
     setLoading(false);
     if (error) {

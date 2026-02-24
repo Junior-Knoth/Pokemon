@@ -38,11 +38,58 @@ export default function LoginModal({ onAuth }) {
       return setError("Senha precisa ter pelo menos 6 caracteres");
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    setLoading(false);
-    if (error) return setError(error.message);
-    // If signup requires confirmation, data.user may be null; still call onAuth with session or user if present
-    onAuth(data.user || data.session?.user || null);
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) {
+        // common server-side SMTP / rate limit errors
+        if (
+          error.message &&
+          error.message.toLowerCase().includes("rate limit")
+        ) {
+          setError(
+            "Limite de envios de e-mail atingido. Tente novamente mais tarde ou desative confirmação por e-mail no painel do Supabase.",
+          );
+        } else {
+          setError(error.message || "Erro ao registrar");
+        }
+        setLoading(false);
+        return;
+      }
+
+      // If signup returns a session/user we can proceed
+      if (data?.session || data?.user) {
+        setLoading(false);
+        onAuth(data.user || data.session?.user);
+        return;
+      }
+
+      // No session (email confirm required). Try to sign in immediately — in some Supabase setups this will still fail until confirmation.
+      try {
+        const { data: signInData, error: signInError } =
+          await supabase.auth.signInWithPassword({ email, password });
+        setLoading(false);
+        if (signInError) {
+          // Inform user that confirmation may be required
+          setError(
+            signInError.message ||
+              "Registro efetuado. Por favor verifique seu e-mail para confirmar a conta.",
+          );
+          onAuth(null);
+          return;
+        }
+        onAuth(signInData.user || signInData.session?.user);
+      } catch (siErr) {
+        setLoading(false);
+        setError(
+          "Registro efetuado. Por favor verifique seu e-mail para confirmar a conta.",
+        );
+        onAuth(null);
+      }
+    } catch (e) {
+      setLoading(false);
+      console.error(e);
+      setError("Erro ao registrar");
+    }
   }
 
   return (

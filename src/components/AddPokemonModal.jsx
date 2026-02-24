@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import styles from "./AddPokemonModal.module.css";
 import { Mars, Venus } from "lucide-react";
 import { supabase } from "../supabase/client";
@@ -35,6 +35,32 @@ export default function AddPokemonModal({
     // when modal opens, sync currentGame with prop
     setCurrentGame(selectedGame || null);
   }, [open]);
+
+  // compute and update overlay position so suggestions are fixed to viewport
+  useEffect(() => {
+    function updateOverlay() {
+      const el = inputRef.current;
+      if (!el) {
+        setOverlayStyle(null);
+        return;
+      }
+      const rect = el.getBoundingClientRect();
+      setOverlayStyle({
+        position: "fixed",
+        top: `${rect.bottom + 4}px`,
+        left: `${rect.left}px`,
+        width: `${rect.width}px`,
+        zIndex: 9999,
+      });
+    }
+    updateOverlay();
+    window.addEventListener("resize", updateOverlay);
+    window.addEventListener("scroll", updateOverlay, true);
+    return () => {
+      window.removeEventListener("resize", updateOverlay);
+      window.removeEventListener("scroll", updateOverlay, true);
+    };
+  }, [open, species]);
 
   useEffect(() => {
     setCurrentGame(selectedGame || null);
@@ -83,6 +109,130 @@ export default function AddPokemonModal({
     }, 600);
     return () => clearTimeout(id);
   }, [species]);
+
+  // preload all pokemon names for autocomplete (one-time per component instance)
+  const allNamesRef = useRef(null);
+  const inputRef = useRef(null);
+  const suggestionsRef = useRef(null);
+  const [overlayStyle, setOverlayStyle] = useState(null);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  useEffect(() => {
+    let mounted = true;
+    async function loadAll() {
+      if (allNamesRef.current) return;
+      try {
+        const res = await fetch("https://pokeapi.co/api/v2/pokemon?limit=2000");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!mounted) return;
+        allNamesRef.current = (data.results || []).map((r) => r.name || "");
+      } catch (e) {
+        // ignore
+      }
+    }
+    if (open) loadAll();
+    return () => {
+      mounted = false;
+    };
+  }, [open]);
+
+  function fetchPokemonDetailsImmediate(name) {
+    // used when selecting from autocomplete — fetch sprite and types immediately
+    (async () => {
+      if (!name) return;
+      setChecking(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(name)}`,
+        );
+        if (!res.ok) {
+          setExists(false);
+          setSprite(null);
+          setTypes([]);
+        } else {
+          const data = await res.json();
+          setExists(true);
+          const found =
+            data.sprites?.other?.["official-artwork"]?.front_default ||
+            data.sprites?.front_default ||
+            null;
+          setSprite(found);
+          const t = (data.types || [])
+            .map((it) => it.type?.name)
+            .filter(Boolean);
+          setTypes(t);
+          setError(null);
+        }
+      } catch (e) {
+        setError("Erro ao verificar PokéAPI");
+      } finally {
+        setChecking(false);
+      }
+    })();
+  }
+
+  function handleInputKeyDown(e) {
+    if (!allNamesRef.current) return;
+    const q = (species || "").trim().toLowerCase();
+    const matches = allNamesRef.current
+      .filter((n) => n && n.includes(q))
+      .slice(0, 8);
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (matches.length === 0) return;
+      setHighlightedIndex((i) => Math.min(i + 1, matches.length - 1));
+      setShowSuggestions(true);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (matches.length === 0) return;
+      setHighlightedIndex((i) => Math.max(i - 1, 0));
+      setShowSuggestions(true);
+    } else if (e.key === "Enter") {
+      if (highlightedIndex >= 0 && matches[highlightedIndex]) {
+        const m = matches[highlightedIndex];
+        setSpecies(m);
+        fetchPokemonDetailsImmediate(m);
+        setShowSuggestions(false);
+        setHighlightedIndex(-1);
+        e.preventDefault();
+      } else if (matches.length > 0) {
+        const m = matches[0];
+        setSpecies(m);
+        fetchPokemonDetailsImmediate(m);
+        setShowSuggestions(false);
+        setHighlightedIndex(-1);
+        e.preventDefault();
+      }
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setHighlightedIndex(-1);
+    }
+  }
+
+  function handleInputBlur() {
+    // delay hiding to allow mouse selection handlers to run
+    setTimeout(() => {
+      setShowSuggestions(false);
+      setHighlightedIndex(-1);
+    }, 120);
+  }
+
+  // hide suggestions when clicking outside input or suggestions list
+  useEffect(() => {
+    if (!showSuggestions) return;
+    function onDocMouseDown(e) {
+      const t = e.target;
+      if (inputRef.current && inputRef.current.contains(t)) return;
+      if (suggestionsRef.current && suggestionsRef.current.contains(t)) return;
+      setShowSuggestions(false);
+      setHighlightedIndex(-1);
+    }
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, [showSuggestions]);
 
   async function handleCreate() {
     setError(null);
@@ -238,10 +388,60 @@ export default function AddPokemonModal({
           <div className={styles.rowInline}>
             <input
               className={styles.input}
+              ref={inputRef}
               value={species}
-              onChange={(e) => setSpecies(e.target.value)}
+              onChange={(e) => {
+                setSpecies(e.target.value);
+                setHighlightedIndex(-1);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onKeyDown={handleInputKeyDown}
               placeholder="Digite o nome da espécie (ex: pikachu)"
+              autoComplete="off"
             />
+            {/* autocomplete suggestions */}
+            {species && allNamesRef.current && showSuggestions
+              ? (() => {
+                  const q = species.trim().toLowerCase();
+                  if (!q) return null;
+                  const matches = allNamesRef.current
+                    .filter((n) => n && n.includes(q))
+                    .slice(0, 8);
+                  if (!matches || matches.length === 0) return null;
+                  return (
+                    <div
+                      className={styles.autocompleteList}
+                      style={overlayStyle}
+                      role="listbox"
+                    >
+                      {matches.map((m, idx) => (
+                        <div
+                          key={m}
+                          className={styles.autocompleteItem}
+                          onMouseDown={(ev) => {
+                            // use onMouseDown to ensure selection before blur
+                            ev.preventDefault();
+                            setSpecies(m);
+                            fetchPokemonDetailsImmediate(m);
+                            setShowSuggestions(false);
+                            setHighlightedIndex(-1);
+                          }}
+                          style={
+                            idx === highlightedIndex
+                              ? { background: "rgba(255,255,255,0.04)" }
+                              : undefined
+                          }
+                          role="option"
+                          aria-selected={idx === highlightedIndex}
+                        >
+                          {m}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()
+              : null}
             <div className={styles.preview}>
               {checking ? <div className={styles.smallLoading}>...</div> : null}
               {sprite ? (
