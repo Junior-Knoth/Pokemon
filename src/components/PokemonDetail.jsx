@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { supabase } from "../supabase/client";
 import styles from "./PokemonDetail.module.css";
 import EvolutionSheet from "./EvolutionSheet";
 
@@ -220,8 +221,39 @@ export default function PokemonDetail({ pokemon, onClose }) {
     return parts.join(" • ");
   }
 
+  async function handleRelease() {
+    if (!pokemon?.id) return;
+    const ok = window.confirm(
+      `Tem certeza que deseja soltar ${pokemon.nickname || pokemon.species_name}?`,
+    );
+    if (!ok) return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase
+        .from("pokemons")
+        .delete()
+        .eq("id", pokemon.id)
+        .select()
+        .single();
+      if (error) {
+        console.error("Delete error", error);
+        alert("Não foi possível soltar o pokémon.");
+        return;
+      }
+      // notify parent if it wants to handle UI updates
+      if (typeof onClose === "function") onClose();
+      if (typeof pokemon?.onDeleted === "function") pokemon.onDeleted(data);
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao soltar o pokémon.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   const [stats, setStats] = useState(null);
   const [evolutions, setEvolutions] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [showEvoSheet, setShowEvoSheet] = useState(false);
 
   useEffect(() => {
@@ -553,9 +585,10 @@ export default function PokemonDetail({ pokemon, onClose }) {
         </button>
         <button
           className={`${styles.dtButton} ${styles.dtDanger}`}
-          onClick={() => {}}
+          onClick={handleRelease}
+          disabled={deleting}
         >
-          Soltar
+          {deleting ? "Soltando..." : "Soltar"}
         </button>
       </div>
       <EvolutionSheet
