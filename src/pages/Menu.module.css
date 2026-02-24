@@ -24,3 +24,8 @@
   padding: 20px;
   box-sizing: border-box;
 }
+
+.bottomSpacer {
+  height: 120px; /* space so fixed ThumbZone doesn't cover last cards */
+  width: 100%;
+}

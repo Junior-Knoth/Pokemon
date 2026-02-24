@@ -7,9 +7,11 @@ import {
   ChevronUp,
 } from "lucide-react";
 import styles from "./ThumbZone.module.css";
+import FilterSheet from "./FilterSheet";
 
-export default function ThumbZone() {
+export default function ThumbZone({ initialFilters, onApply }) {
   const [hasScroll, setHasScroll] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     function check() {
@@ -35,42 +37,68 @@ export default function ThumbZone() {
     });
   }
 
+  function openFilters() {
+    setShowFilters(true);
+  }
+
+  function closeFilters() {
+    setShowFilters(false);
+  }
+
+  function handleApply(filters) {
+    // forward filters to parent
+    onApply?.(filters);
+    console.log("Applied filters", filters);
+  }
+
   return (
-    <div className={styles.thumbZone}>
-      <div className={styles.left}>
-        {hasScroll ? (
-          <div className={styles.verticalButtons}>
-            <button
-              className={styles.small}
-              onClick={goTop}
-              aria-label="Ir para o topo"
-            >
-              <ChevronUp />
-            </button>
-            <button
-              className={styles.small}
-              onClick={goBottom}
-              aria-label="Ir para o final"
-            >
-              <ChevronDown />
-            </button>
-          </div>
-        ) : (
-          <div style={{ width: 56 }} />
-        )}
-      </div>
+    <>
+      <div className={styles.thumbZone}>
+        <div className={styles.left}>
+          {hasScroll ? (
+            <div className={styles.verticalButtons}>
+              <button
+                className={styles.small}
+                onClick={goTop}
+                aria-label="Ir para o topo"
+              >
+                <ChevronUp size={22} />
+              </button>
+              <button
+                className={styles.small}
+                onClick={goBottom}
+                aria-label="Ir para o final"
+              >
+                <ChevronDown size={22} />
+              </button>
+            </div>
+          ) : (
+            <div style={{ width: 56 }} />
+          )}
+        </div>
 
-      <div className={styles.center}>
-        <button className={styles.add} aria-label="Adicionar pokémon">
-          Adicionar pokémon
-        </button>
-      </div>
+        <div className={styles.center}>
+          <button className={styles.add} aria-label="Adicionar pokémon">
+            Adicionar pokémon
+          </button>
+        </div>
 
-      <div className={styles.right}>
-        <button className={styles.filter} aria-label="Filtros">
-          <Filter />
-        </button>
+        <div className={styles.right}>
+          <button
+            className={styles.filter}
+            aria-label="Filtros"
+            onClick={openFilters}
+          >
+            <Filter size={22} />
+          </button>
+        </div>
       </div>
-    </div>
+      <FilterSheet
+        open={showFilters}
+        onClose={closeFilters}
+        onApply={handleApply}
+        initial={initialFilters}
+      />
+    </>
   );
 }
