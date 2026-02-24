@@ -47,6 +47,9 @@
   color: #e6edf3;
   font-weight: 600;
 }
+.dtButton:focus {
+  outline: none;
+}
 
 .dtDanger {
   background: rgba(255, 72, 66, 0.12);

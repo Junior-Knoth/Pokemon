@@ -47,6 +47,10 @@
   color: #e6edf3;
   border-radius: 6px;
 }
+.input:focus {
+  outline: none;
+  background-color: #1d1d22;
+}
 .footer {
   position: absolute;
   left: 0;
@@ -87,10 +91,13 @@
   color: #e6edf3;
   cursor: pointer;
 }
-.genderActive {
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.06);
-  background: #1db954;
+.genderBtn:focus {
+  outline: none;
 }
+.genderText:focus {
+  outline: none;
+}
+
 .genderText {
   padding: 8px 12px;
   border-radius: 8px;
@@ -98,6 +105,13 @@
   border: none;
   color: #e6edf3;
   cursor: pointer;
+}
+.genderText:focus {
+  outline: none;
+}
+.genderActive {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.06);
+  background: #1db954;
 }
 .gamePickerBackdrop {
   position: fixed;
@@ -138,4 +152,7 @@
   color: #e6edf3;
   border-radius: 8px;
   cursor: pointer;
+}
+.editGameBtn:focus {
+  outline: none;
 }

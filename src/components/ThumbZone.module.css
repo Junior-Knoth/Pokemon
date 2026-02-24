@@ -57,7 +57,10 @@
   justify-content: center;
   cursor: pointer;
 }
-
+.small:focus {
+  outline: none;
+  background-color: #1d1d22;
+}
 .add {
   background: #1db954;
   border: none;

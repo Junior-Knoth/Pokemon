@@ -96,7 +96,10 @@
   align-items: center;
   justify-content: center;
 }
-
+.hamburger:focus {
+  outline: none;
+  background-color: #1d1d22;
+}
 .leftList {
   position: absolute;
   top: 64px;

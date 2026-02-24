@@ -38,6 +38,10 @@
   align-items: center;
   justify-content: center;
 }
+.pagerButton:focus {
+  outline: none;
+  background-color: #1d1d22;
+}
 .pagerButton:disabled {
   opacity: 0.4;
   cursor: not-allowed;

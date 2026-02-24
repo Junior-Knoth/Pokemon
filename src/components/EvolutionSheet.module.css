@@ -78,9 +78,19 @@
   border: none;
   padding: 0;
 }
+.option:focus {
+  outline: none;
+  background: #1db954;
+  & .optName {
+    color: #0b0b0d;
+  }
+}
 .active {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.04);
+  background: #1db954;
   border-radius: 8px;
+  & .optName {
+    color: #0b0b0d;
+  }
 }
 .optCard {
   display: flex;

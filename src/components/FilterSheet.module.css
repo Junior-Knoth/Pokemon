@@ -56,6 +56,9 @@
   color: #e6edf3;
   cursor: pointer;
 }
+.pill:focus {
+  outline: none;
+}
 .activePill {
   background: #1db954;
   color: white;
@@ -79,7 +82,9 @@
   background: #2b7a3a;
   color: #fff;
 }
-
+.typeBtn:focus {
+  outline: none;
+}
 .footer {
   position: absolute;
   left: 0;
