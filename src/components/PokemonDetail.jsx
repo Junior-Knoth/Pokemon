@@ -605,11 +605,11 @@ export default function PokemonDetail({
         pokemon={pokemon}
         evolutions={evolutions || []}
         onConfirmed={(updated) => {
-            console.log("Evolved", updated);
-            // notify parent/grid about the updated row so UI refreshes immediately
-            onUpdated?.(updated);
-            setShowEvoSheet(false);
-            onClose?.();
+          console.log("Evolved", updated);
+          // notify parent/grid about the updated row so UI refreshes immediately
+          onUpdated?.(updated);
+          setShowEvoSheet(false);
+          onClose?.();
         }}
       />
       <EditPokemonModal
