@@ -9,6 +9,7 @@ export default function PokemonGrid({
   search,
   rows = 5,
   cols = 3,
+  sort = "none",
 }) {
   const [pokemons, setPokemons] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ export default function PokemonGrid({
       const { data, error } = await supabase
         .from("pokemons")
         .select(
-          "id, nickname, species_name, sprite_url, type_1, type_2, is_active",
+          "id, nickname, species_name, sprite_url, type_1, type_2, is_active, gender, created_at",
         )
         .eq("game_id", selected.id)
         .order("created_at", { ascending: true });
@@ -87,6 +88,31 @@ export default function PokemonGrid({
 
   const visible = searched.slice(0, max);
 
+  // apply sorting
+  let finalList = searched;
+  if (sort === "recent") {
+    // sort by created_at desc
+    finalList = [...searched].sort((a, b) => {
+      const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return tb - ta;
+    });
+  } else if (sort === "alpha-asc") {
+    finalList = [...searched].sort((a, b) => {
+      const aa = String(a.nickname || a.species_name || "").toLowerCase();
+      const bb = String(b.nickname || b.species_name || "").toLowerCase();
+      return aa.localeCompare(bb);
+    });
+  } else if (sort === "alpha-desc") {
+    finalList = [...searched].sort((a, b) => {
+      const aa = String(a.nickname || a.species_name || "").toLowerCase();
+      const bb = String(b.nickname || b.species_name || "").toLowerCase();
+      return bb.localeCompare(aa);
+    });
+  }
+
+  const visibleSorted = finalList.slice(0, max);
+
   if (!selected)
     return (
       <div className={styles.empty}>Selecione um jogo para ver Pokémons</div>
@@ -98,7 +124,7 @@ export default function PokemonGrid({
       style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
     >
       {loading && <div className={styles.loading}>Carregando...</div>}
-      {visible.map((p) => (
+      {visibleSorted.map((p) => (
         <PokemonCard key={p.id} pokemon={p} />
       ))}
     </section>
