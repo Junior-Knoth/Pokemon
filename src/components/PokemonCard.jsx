@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Mars, Venus, HelpCircle, Slash } from "lucide-react";
 import styles from "./PokemonCard.module.css";
+import PokemonDetail from "./PokemonDetail";
 
 export default function PokemonCard({ pokemon }) {
   const [sprite, setSprite] = useState(pokemon.sprite_url || null);
+  const [showDetail, setShowDetail] = useState(false);
 
   useEffect(() => {
     if (sprite) return;
@@ -34,98 +36,114 @@ export default function PokemonCard({ pokemon }) {
   }, [pokemon, sprite]);
 
   return (
-    <article className={styles.card}>
-      <div className={styles.imageWrapper} style={{ position: "relative" }}>
-        {/* gender badge */}
-        {(() => {
-          const raw = pokemon?.gender;
-          // normalize empty / 'null' strings to actual null
-          let g = null;
-          if (raw !== null && raw !== undefined) {
-            const s = String(raw).trim();
-            if (s !== "" && s.toLowerCase() !== "null") g = s.toLowerCase();
-          }
+    <>
+      <article
+        className={styles.card}
+        onClick={() => setShowDetail(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") setShowDetail(true);
+        }}
+        style={{ cursor: "pointer" }}
+      >
+        <div className={styles.imageWrapper} style={{ position: "relative" }}>
+          {/* gender badge */}
+          {(() => {
+            const raw = pokemon?.gender;
+            // normalize empty / 'null' strings to actual null
+            let g = null;
+            if (raw !== null && raw !== undefined) {
+              const s = String(raw).trim();
+              if (s !== "" && s.toLowerCase() !== "null") g = s.toLowerCase();
+            }
 
-          const maleValues = new Set(["male", "m", "masculino", "masc"]);
-          const femaleValues = new Set(["female", "f", "feminino", "fem"]);
-          const noneValues = new Set([
-            "none",
-            "genderless",
-            "sem genero",
-            "sem-genero",
-            "sem gênero",
-            "genderless",
-            "nenhum",
-            "none",
-          ]);
+            const maleValues = new Set(["male", "m", "masculino", "masc"]);
+            const femaleValues = new Set(["female", "f", "feminino", "fem"]);
+            const noneValues = new Set([
+              "none",
+              "genderless",
+              "sem genero",
+              "sem-genero",
+              "sem gênero",
+              "genderless",
+              "nenhum",
+              "none",
+            ]);
 
-          let Icon = HelpCircle;
-          let style = { width: 18, height: 18, color: "white" };
-          let wrapperStyle = {
-            position: "absolute",
-            top: 6,
-            right: 6,
-            width: 22,
-            height: 22,
-            borderRadius: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-          };
+            let Icon = HelpCircle;
+            let style = { width: 18, height: 18, color: "white" };
+            let wrapperStyle = {
+              position: "absolute",
+              top: 6,
+              right: 6,
+              width: 22,
+              height: 22,
+              borderRadius: 9999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+            };
 
-          if (g !== null && maleValues.has(g)) {
-            Icon = Mars;
-            wrapperStyle.background = "#2188ff"; // blue
-          } else if (g !== null && femaleValues.has(g)) {
-            Icon = Venus;
-            wrapperStyle.background = "#ff3860"; // red
-          } else if (g !== null && noneValues.has(g)) {
-            Icon = Slash;
-            wrapperStyle.background = "#e6e6e6"; // light gray
-            style.color = "#333";
-          } else if (g === null) {
-            // unknown (null or empty in DB) -> gradient
-            Icon = HelpCircle;
-            wrapperStyle.background = "linear-gradient(135deg,#2188ff,#ff3860)";
-          } else {
-            // fallback unknown for other unexpected strings
-            Icon = HelpCircle;
-            wrapperStyle.background = "linear-gradient(135deg,#2188ff,#ff3860)";
-          }
+            if (g !== null && maleValues.has(g)) {
+              Icon = Mars;
+              wrapperStyle.background = "#2188ff"; // blue
+            } else if (g !== null && femaleValues.has(g)) {
+              Icon = Venus;
+              wrapperStyle.background = "#ff3860"; // red
+            } else if (g !== null && noneValues.has(g)) {
+              Icon = Slash;
+              wrapperStyle.background = "#e6e6e6"; // light gray
+              style.color = "#333";
+            } else if (g === null) {
+              // unknown (null or empty in DB) -> gradient
+              Icon = HelpCircle;
+              wrapperStyle.background =
+                "linear-gradient(135deg,#2188ff,#ff3860)";
+            } else {
+              // fallback unknown for other unexpected strings
+              Icon = HelpCircle;
+              wrapperStyle.background =
+                "linear-gradient(135deg,#2188ff,#ff3860)";
+            }
 
-          const titleText =
-            g !== null
-              ? maleValues.has(g)
-                ? "Masculino"
-                : femaleValues.has(g)
-                  ? "Feminino"
-                  : noneValues.has(g)
-                    ? "Sem gênero"
-                    : "Desconhecido"
-              : "Desconhecido";
+            const titleText =
+              g !== null
+                ? maleValues.has(g)
+                  ? "Masculino"
+                  : femaleValues.has(g)
+                    ? "Feminino"
+                    : noneValues.has(g)
+                      ? "Sem gênero"
+                      : "Desconhecido"
+                : "Desconhecido";
 
-          return (
-            <div title={titleText} style={wrapperStyle}>
-              <Icon {...style} />
-            </div>
-          );
-        })()}
-        {sprite ? (
-          <img
-            src={sprite}
-            alt={pokemon.species_name}
-            className={styles.image}
-          />
-        ) : (
-          <div className={styles.placeholder} />
-        )}
-      </div>
-      <div className={styles.footer}>
-        <div className={styles.name}>
-          {pokemon.nickname || pokemon.species_name}
+            return (
+              <div title={titleText} style={wrapperStyle}>
+                <Icon {...style} />
+              </div>
+            );
+          })()}
+          {sprite ? (
+            <img
+              src={sprite}
+              alt={pokemon.species_name}
+              className={styles.image}
+            />
+          ) : (
+            <div className={styles.placeholder} />
+          )}
         </div>
-      </div>
-    </article>
+        <div className={styles.footer}>
+          <div className={styles.name}>
+            {pokemon.nickname || pokemon.species_name}
+          </div>
+        </div>
+      </article>
+      {showDetail ? (
+        <PokemonDetail pokemon={pokemon} onClose={() => setShowDetail(false)} />
+      ) : null}
+    </>
   );
 }
