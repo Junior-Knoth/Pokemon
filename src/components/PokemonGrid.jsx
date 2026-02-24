@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabase/client";
 import PokemonCard from "./PokemonCard";
 import styles from "./PokemonGrid.module.css";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function PokemonGrid({
   selected,
@@ -11,9 +12,11 @@ export default function PokemonGrid({
   cols = 3,
   sort = "none",
   reloadKey = 0,
+  added = [],
 }) {
   const [pokemons, setPokemons] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     if (!selected?.id) {
@@ -47,8 +50,24 @@ export default function PokemonGrid({
 
   const max = rows * cols;
 
+  // merge server pokemons with locally added ones for this selected game
+  const addedList = Array.isArray(added)
+    ? added.filter((a) => a && a.game_id === selected?.id)
+    : [];
+  const combined = [
+    ...addedList,
+    ...pokemons.filter(
+      (p) => !addedList.some((a) => String(a.id) === String(p.id)),
+    ),
+  ];
+
+  // reset page when key data changes
+  useEffect(() => {
+    setPage(0);
+  }, [selected?.id, filters, search, sort, added]);
+
   // apply client-side filters (status and types)
-  const applied = pokemons.filter((p) => {
+  const applied = combined.filter((p) => {
     if (!filters) return true;
     const { status, types } = filters || {};
 
@@ -87,7 +106,10 @@ export default function PokemonGrid({
       })
     : applied;
 
-  const visible = searched.slice(0, max);
+  const total = searched.length;
+  const totalPages = Math.max(1, Math.ceil(total / max));
+  const start = page * max;
+  const visible = searched.slice(start, start + max);
 
   // apply sorting
   let finalList = searched;
@@ -112,7 +134,7 @@ export default function PokemonGrid({
     });
   }
 
-  const visibleSorted = finalList.slice(0, max);
+  const visibleSorted = finalList.slice(start, start + max);
 
   if (!selected)
     return (
@@ -128,6 +150,35 @@ export default function PokemonGrid({
       {visibleSorted.map((p) => (
         <PokemonCard key={p.id} pokemon={p} />
       ))}
+      <div
+        style={{
+          gridColumn: `1 / -1`,
+          display: "flex",
+          justifyContent: "center",
+          gap: 8,
+          marginTop: 8,
+        }}
+      >
+        <button
+          className={styles.pagerButton}
+          aria-label="Página anterior"
+          onClick={() => setPage((s) => Math.max(0, s - 1))}
+          disabled={page <= 0}
+        >
+          <ChevronLeft />
+        </button>
+        <div
+          className={styles.pagerInfo}
+        >{`${page * max + 1}-${Math.min((page + 1) * max, total)} de ${total}`}</div>
+        <button
+          className={styles.pagerButton}
+          aria-label="Próxima página"
+          onClick={() => setPage((s) => Math.min(totalPages - 1, s + 1))}
+          disabled={page >= totalPages - 1}
+        >
+          <ChevronRight />
+        </button>
+      </div>
     </section>
   );
 }

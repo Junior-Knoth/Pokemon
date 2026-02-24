@@ -1,5 +1,4 @@
 .header {
-  position: relative;
   width: 100%;
   padding: 16px 20px;
   display: grid;
@@ -8,6 +7,9 @@
   background: transparent;
   color: inherit;
   background-color: #1d1d22;
+  & * {
+    overflow: hidden;
+  }
 }
 
 .left {
@@ -41,7 +43,6 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  position: relative;
 }
 
 .toggle {
@@ -61,7 +62,7 @@
 
 .list {
   position: absolute;
-  top: 28px;
+  top: 64px;
   right: 0;
   min-width: 180px;
   background: #0b0b0d;

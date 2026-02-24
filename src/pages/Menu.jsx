@@ -9,10 +9,15 @@ export default function Menu({ selected, onSelect }) {
   const [filters, setFilters] = useState({ status: "all", types: [] });
   const [query, setQuery] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
+  const [localAdds, setLocalAdds] = useState([]);
   // sort state: 'none' | 'recent' | 'alpha-asc' | 'alpha-desc'
   const [sort, setSort] = useState("none");
   // store previous sort so alpha can revert back to it on 3rd click
   const [prevSortBeforeAlpha, setPrevSortBeforeAlpha] = useState(null);
+  useEffect(() => {
+    // clear locally added pokemons when switching selected game
+    setLocalAdds([]);
+  }, [selected?.id]);
 
   function handleRecentClick() {
     setSort((s) => {
@@ -49,13 +54,14 @@ export default function Menu({ selected, onSelect }) {
         search={query}
         sort={sort}
         reloadKey={reloadKey}
+        added={localAdds}
       />
       <div className={styles.bottomSpacer} />
       <ThumbZone
         initialFilters={filters}
         onApply={setFilters}
         selected={selected}
-        onCreated={() => setReloadKey((k) => k + 1)}
+        onCreated={(p) => setLocalAdds((s) => [p, ...s])}
       />
     </div>
   );

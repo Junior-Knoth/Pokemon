@@ -17,3 +17,32 @@
   padding: 12px 20px;
   color: #9fb0c8;
 }
+
+/* pagination */
+.pager {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+.pagerButton {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  color: #e6edf3;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pagerButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pagerInfo {
+  color: #9fb0c8;
+  font-size: 13px;
+}

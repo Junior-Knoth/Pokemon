@@ -33,16 +33,6 @@ export default function PokemonCard({ pokemon }) {
     };
   }, [pokemon, sprite]);
 
-  useEffect(() => {
-    // debug log: show the gender value coming from the DB
-    try {
-      console.log(
-        `[PokemonCard] id=${pokemon?.id} nickname=${pokemon?.nickname || ""} gender=`,
-        pokemon?.gender,
-      );
-    } catch (e) {}
-  }, [pokemon]);
-
   return (
     <article className={styles.card}>
       <div className={styles.imageWrapper} style={{ position: "relative" }}>
