@@ -192,6 +192,25 @@
 }
 
 /* confirmation overlay */
-.confirmBackdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:140 }
-.confirmBox { background: #0b0b0d; color: #e6edf3; padding:16px; border-radius:8px; max-width: 560px; width: calc(100% - 40px); box-shadow: 0 8px 24px rgba(0,0,0,0.6) }
-.confirmBox p { margin:0; color:#cfe6ff }
+.confirmBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 140;
+}
+.confirmBox {
+  background: #0b0b0d;
+  color: #e6edf3;
+  padding: 16px;
+  border-radius: 8px;
+  max-width: 560px;
+  width: calc(100% - 40px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+.confirmBox p {
+  margin: 0;
+  color: #cfe6ff;
+}

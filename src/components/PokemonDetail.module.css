@@ -18,6 +18,44 @@
   position: relative;
   max-height: 90vh;
   overflow-y: auto;
+  padding-bottom: 96px;
+}
+
+.detailThumbZone {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
+  width: 92%;
+  max-width: 720px;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 8px;
+  background: rgba(11, 11, 13, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  z-index: 220;
+}
+
+.dtButton {
+  flex: 1 1 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.03);
+  color: #e6edf3;
+  font-weight: 600;
+}
+
+.dtDanger {
+  background: rgba(255, 72, 66, 0.12);
+  color: #ff6b68;
+}
+
+.dtPrimary {
+  color: #071019;
+  font-weight: 700;
 }
 .close {
   position: absolute;

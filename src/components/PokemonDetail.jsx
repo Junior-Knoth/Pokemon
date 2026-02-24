@@ -535,6 +535,27 @@ export default function PokemonDetail({ pokemon, onClose }) {
           </div>
         </div>
       </div>
+      <div
+        className={styles.detailThumbZone}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button className={styles.dtButton} onClick={() => {}}>
+          Editar
+        </button>
+        <button
+          className={`${styles.dtButton} ${styles.dtPrimary}`}
+          onClick={() => {}}
+          style={{ background: typeColors[t1] || "rgba(255,255,255,0.06)" }}
+        >
+          Evoluir
+        </button>
+        <button
+          className={`${styles.dtButton} ${styles.dtDanger}`}
+          onClick={() => {}}
+        >
+          Soltar
+        </button>
+      </div>
     </div>
   );
 }
