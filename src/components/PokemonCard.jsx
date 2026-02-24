@@ -7,6 +7,32 @@ export default function PokemonCard({ pokemon }) {
   const [sprite, setSprite] = useState(pokemon.sprite_url || null);
   const [showDetail, setShowDetail] = useState(false);
 
+  const typeColors = {
+    normal: "#A8A77A",
+    fire: "#EE8130",
+    water: "#6390F0",
+    electric: "#F7D02C",
+    grass: "#7AC74C",
+    ice: "#96D9D6",
+    fighting: "#C22E28",
+    poison: "#A33EA1",
+    ground: "#E2BF65",
+    flying: "#A98FF3",
+    psychic: "#F95587",
+    bug: "#A6B91A",
+    rock: "#B6A136",
+    ghost: "#735797",
+    dragon: "#6F35FC",
+    dark: "#705746",
+    steel: "#B7B7CE",
+    fairy: "#D685AD",
+  };
+
+  const primaryType = String(
+    pokemon.type_1 || pokemon.type1 || "",
+  ).toLowerCase();
+  const borderColor = typeColors[primaryType] || "rgba(255,255,255,0.03)";
+
   useEffect(() => {
     if (sprite) return;
     let mounted = true;
@@ -45,7 +71,7 @@ export default function PokemonCard({ pokemon }) {
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") setShowDetail(true);
         }}
-        style={{ cursor: "pointer" }}
+        style={{ cursor: "pointer", border: `1px solid ${borderColor}` }}
       >
         <div className={styles.imageWrapper} style={{ position: "relative" }}>
           {/* gender badge */}

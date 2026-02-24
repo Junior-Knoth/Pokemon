@@ -14,7 +14,17 @@
 }
 
 * {
-  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  overflow-x: hidden; /* Opcional: impede o menu de "copiar" ao segurar o dedo */
+}
+
+/* Garante que botões e itens clicáveis não fiquem com o contorno de foco ao clicar */
+button:focus,
+div:focus,
+a:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 button {

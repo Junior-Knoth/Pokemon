@@ -130,8 +130,12 @@ export default function FilterSheet({ open, onClose, onApply, initial }) {
             <button
               className={styles.clear}
               onClick={() => {
-                setStatus("all");
-                setTypes(new Set());
+                const nextStatus = "all";
+                const nextTypes = new Set();
+                setStatus(nextStatus);
+                setTypes(nextTypes);
+                // apply cleared filters immediately so the list updates
+                onApply?.({ status: nextStatus, types: Array.from(nextTypes) });
               }}
             >
               Limpar

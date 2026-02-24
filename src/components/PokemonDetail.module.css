@@ -32,6 +32,39 @@
   gap: 12px;
   align-items: center;
 }
+.matchups {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.matchupColumn {
+  flex: 1 1 0;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.matchupTitle {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.typeList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.typePill {
+  width: 100%;
+  padding: 4px 0;
+  display: flex;
+  justify-content: space-between;
+  background: transparent;
+  border-bottom: 3px solid transparent;
+}
 .imageWrap {
   width: 96px;
   height: 96px;
