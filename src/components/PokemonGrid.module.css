@@ -1,0 +1,19 @@
+.grid {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  box-sizing: border-box;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: #9fb0c8;
+}
+
+.loading {
+  padding: 12px 20px;
+  color: #9fb0c8;
+}

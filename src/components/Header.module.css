@@ -1,0 +1,86 @@
+.header {
+  position: relative;
+  width: 100%;
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  align-items: center;
+  background: transparent;
+  color: inherit;
+  background-color: #1d1d22;
+}
+
+.left {
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.brand {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  margin: 0 auto;
+  font-size: 18px;
+  width: 100%;
+  text-align: center;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+}
+
+.dropdownWrapper {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.toggle {
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.toggle:focus {
+  outline: none;
+  background-color: #1d1d22;
+}
+
+.list {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  min-width: 180px;
+  background: #0b0b0d;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  padding: 6px 0;
+  list-style: none;
+  margin: 0;
+  z-index: 50;
+}
+
+.item {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #dbe8f5;
+  cursor: pointer;
+}
+
+.item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
