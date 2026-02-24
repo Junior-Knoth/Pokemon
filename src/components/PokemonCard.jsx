@@ -3,7 +3,7 @@ import { Mars, Venus, HelpCircle, Slash } from "lucide-react";
 import styles from "./PokemonCard.module.css";
 import PokemonDetail from "./PokemonDetail";
 
-export default function PokemonCard({ pokemon }) {
+export default function PokemonCard({ pokemon, onDeleted }) {
   const [sprite, setSprite] = useState(pokemon.sprite_url || null);
   const [showDetail, setShowDetail] = useState(false);
 
@@ -168,7 +168,14 @@ export default function PokemonCard({ pokemon }) {
         </div>
       </article>
       {showDetail ? (
-        <PokemonDetail pokemon={pokemon} onClose={() => setShowDetail(false)} />
+        <PokemonDetail
+          pokemon={pokemon}
+          onClose={() => setShowDetail(false)}
+          onDeleted={(deleted) => {
+            onDeleted?.(deleted);
+            setShowDetail(false);
+          }}
+        />
       ) : null}
     </>
   );

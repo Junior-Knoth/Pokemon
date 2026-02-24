@@ -3,7 +3,7 @@ import { supabase } from "../supabase/client";
 import styles from "./PokemonDetail.module.css";
 import EvolutionSheet from "./EvolutionSheet";
 
-export default function PokemonDetail({ pokemon, onClose }) {
+export default function PokemonDetail({ pokemon, onClose, onDeleted }) {
   if (!pokemon) return null;
 
   useEffect(() => {
@@ -240,9 +240,10 @@ export default function PokemonDetail({ pokemon, onClose }) {
         alert("Não foi possível soltar o pokémon.");
         return;
       }
-      // notify parent if it wants to handle UI updates
+      // notify parent to update UI locally
+      onDeleted?.(data);
+      // close modal
       if (typeof onClose === "function") onClose();
-      if (typeof pokemon?.onDeleted === "function") pokemon.onDeleted(data);
     } catch (e) {
       console.error(e);
       alert("Erro ao soltar o pokémon.");

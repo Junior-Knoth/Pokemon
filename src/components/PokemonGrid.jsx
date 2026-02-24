@@ -17,6 +17,7 @@ export default function PokemonGrid({
   const [pokemons, setPokemons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
+  const [removedIds, setRemovedIds] = useState(() => new Set());
 
   useEffect(() => {
     if (!selected?.id) {
@@ -61,13 +62,27 @@ export default function PokemonGrid({
     ),
   ];
 
+  // filter out any locally removed ids (to avoid needing a reload)
+  const combinedFiltered = combined.filter(
+    (p) => !removedIds.has(String(p.id)),
+  );
+
   // reset page when key data changes
   useEffect(() => {
     setPage(0);
   }, [selected?.id, filters, search, sort, added]);
 
+  function handleDeleted(deleted) {
+    if (!deleted || !deleted.id) return;
+    setRemovedIds((s) => {
+      const next = new Set(Array.from(s));
+      next.add(String(deleted.id));
+      return next;
+    });
+  }
+
   // apply client-side filters (status and types)
-  const applied = combined.filter((p) => {
+  const applied = combinedFiltered.filter((p) => {
     if (!filters) return true;
     const { status, types } = filters || {};
 
@@ -148,7 +163,7 @@ export default function PokemonGrid({
     >
       {loading && <div className={styles.loading}>Carregando...</div>}
       {visibleSorted.map((p) => (
-        <PokemonCard key={p.id} pokemon={p} />
+        <PokemonCard key={p.id} pokemon={p} onDeleted={handleDeleted} />
       ))}
       <div
         style={{

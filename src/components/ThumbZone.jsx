@@ -10,7 +10,12 @@ import styles from "./ThumbZone.module.css";
 import FilterSheet from "./FilterSheet";
 import AddPokemonModal from "./AddPokemonModal";
 
-export default function ThumbZone({ initialFilters, onApply, selected }) {
+export default function ThumbZone({
+  initialFilters,
+  onApply,
+  selected,
+  onCreated,
+}) {
   const [hasScroll, setHasScroll] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
