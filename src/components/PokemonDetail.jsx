@@ -2,8 +2,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabase/client";
 import styles from "./PokemonDetail.module.css";
 import EvolutionSheet from "./EvolutionSheet";
+import EditPokemonModal from "./EditPokemonModal";
 
-export default function PokemonDetail({ pokemon, onClose, onDeleted }) {
+export default function PokemonDetail({
+  pokemon,
+  onClose,
+  onDeleted,
+  onUpdated,
+}) {
   if (!pokemon) return null;
 
   useEffect(() => {
@@ -256,6 +262,7 @@ export default function PokemonDetail({ pokemon, onClose, onDeleted }) {
   const [evolutions, setEvolutions] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [showEvoSheet, setShowEvoSheet] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -574,7 +581,7 @@ export default function PokemonDetail({ pokemon, onClose, onDeleted }) {
         className={styles.detailThumbZone}
         onClick={(e) => e.stopPropagation()}
       >
-        <button className={styles.dtButton} onClick={() => {}}>
+        <button className={styles.dtButton} onClick={() => setShowEdit(true)}>
           Editar
         </button>
         <button
@@ -598,9 +605,20 @@ export default function PokemonDetail({ pokemon, onClose, onDeleted }) {
         pokemon={pokemon}
         evolutions={evolutions || []}
         onConfirmed={(updated) => {
-          console.log("Evolved", updated);
-          setShowEvoSheet(false);
-          onClose?.();
+            console.log("Evolved", updated);
+            // notify parent/grid about the updated row so UI refreshes immediately
+            onUpdated?.(updated);
+            setShowEvoSheet(false);
+            onClose?.();
+        }}
+      />
+      <EditPokemonModal
+        open={showEdit}
+        onClose={() => setShowEdit(false)}
+        pokemon={pokemon}
+        onConfirmed={(updated) => {
+          setShowEdit(false);
+          onUpdated?.(updated);
         }}
       />
     </div>

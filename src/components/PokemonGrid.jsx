@@ -13,6 +13,7 @@ export default function PokemonGrid({
   sort = "none",
   reloadKey = 0,
   added = [],
+  onUpdated,
 }) {
   const [pokemons, setPokemons] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -79,6 +80,16 @@ export default function PokemonGrid({
       next.add(String(deleted.id));
       return next;
     });
+  }
+
+  function handleUpdated(row) {
+    if (!row || !row.id) return;
+    // update server-side list local state
+    setPokemons((prev) =>
+      prev.map((p) => (String(p.id) === String(row.id) ? { ...p, ...row } : p)),
+    );
+    // notify parent so it can update localAdds if needed
+    onUpdated?.(row);
   }
 
   // apply client-side filters (status and types)
@@ -163,7 +174,12 @@ export default function PokemonGrid({
     >
       {loading && <div className={styles.loading}>Carregando...</div>}
       {visibleSorted.map((p) => (
-        <PokemonCard key={p.id} pokemon={p} onDeleted={handleDeleted} />
+        <PokemonCard
+          key={p.id}
+          pokemon={p}
+          onDeleted={handleDeleted}
+          onUpdated={handleUpdated}
+        />
       ))}
       <div
         style={{

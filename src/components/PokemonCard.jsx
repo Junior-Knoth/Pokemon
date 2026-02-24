@@ -3,7 +3,7 @@ import { Mars, Venus, HelpCircle, Slash } from "lucide-react";
 import styles from "./PokemonCard.module.css";
 import PokemonDetail from "./PokemonDetail";
 
-export default function PokemonCard({ pokemon, onDeleted }) {
+export default function PokemonCard({ pokemon, onDeleted, onUpdated }) {
   const [sprite, setSprite] = useState(pokemon.sprite_url || null);
   const [showDetail, setShowDetail] = useState(false);
 
@@ -34,6 +34,12 @@ export default function PokemonCard({ pokemon, onDeleted }) {
   const borderColor = typeColors[primaryType] || "rgba(255,255,255,0.03)";
 
   useEffect(() => {
+    // If the incoming pokemon prop has an explicit sprite_url that's different
+    // from our local `sprite` state, update it so the card reflects edits
+    if (pokemon?.sprite_url && pokemon.sprite_url !== sprite) {
+      setSprite(pokemon.sprite_url);
+      return;
+    }
     if (sprite) return;
     let mounted = true;
     async function fetchSprite() {
@@ -173,6 +179,10 @@ export default function PokemonCard({ pokemon, onDeleted }) {
           onClose={() => setShowDetail(false)}
           onDeleted={(deleted) => {
             onDeleted?.(deleted);
+            setShowDetail(false);
+          }}
+          onUpdated={(updated) => {
+            onUpdated?.(updated);
             setShowDetail(false);
           }}
         />

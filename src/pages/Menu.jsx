@@ -55,6 +55,14 @@ export default function Menu({ selected, onSelect }) {
         sort={sort}
         reloadKey={reloadKey}
         added={localAdds}
+        onUpdated={(row) => {
+          // update localAdds immediately if the edited pokemon is in the localAdds list
+          setLocalAdds((prev) =>
+            prev.map((p) =>
+              String(p.id) === String(row.id) ? { ...p, ...row } : p,
+            ),
+          );
+        }}
       />
       <div className={styles.bottomSpacer} />
       <ThumbZone
