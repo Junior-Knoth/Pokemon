@@ -1,7 +1,17 @@
+import { useEffect, useState } from "react";
 import styles from "./PokemonDetail.module.css";
 
 export default function PokemonDetail({ pokemon, onClose }) {
   if (!pokemon) return null;
+
+  useEffect(() => {
+    // Lock background scroll while modal is open
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev || "";
+    };
+  }, []);
 
   function capitalizeWord(s) {
     if (!s && s !== "") return s;
@@ -185,6 +195,53 @@ export default function PokemonDetail({ pokemon, onClose }) {
     fairy: "#D685AD",
   };
 
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchStats() {
+      try {
+        const name = (
+          pokemon.species_name ||
+          pokemon.species ||
+          ""
+        ).toLowerCase();
+        if (!name) return;
+        const res = await fetch(
+          `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(name)}`,
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!mounted) return;
+        const map = {};
+        (data.stats || []).forEach((s) => {
+          map[s.stat.name] = s.base_stat;
+        });
+        setStats(map);
+      } catch (e) {
+        // ignore
+      }
+    }
+    fetchStats();
+    return () => {
+      mounted = false;
+    };
+  }, [pokemon.species_name, pokemon.species]);
+
+  const statOrder = [
+    ["hp", "HP"],
+    ["attack", "Atk"],
+    ["defense", "Def"],
+    ["special-attack", "Sp. Atk"],
+    ["special-defense", "Sp. Def"],
+    ["speed", "Speed"],
+  ];
+
+  const totalBase = statOrder.reduce(
+    (acc, [key]) => acc + (stats?.[key] ?? 0),
+    0,
+  );
+
   return (
     <div className={styles.backdrop} onClick={onClose}>
       <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
@@ -301,6 +358,47 @@ export default function PokemonDetail({ pokemon, onClose }) {
                   ))}
                 </div>
               </div>
+            )}
+          </div>
+
+          <div className={styles.statsSection}>
+            <div className={styles.statsTitle}>Base Stats</div>
+            {stats ? (
+              <div className={styles.statsGrid}>
+                {statOrder.map(([key, label]) => {
+                  const v = stats[key] ?? 0;
+                  const pct = Math.max(
+                    0,
+                    Math.min(100, Math.round((v / 255) * 100)),
+                  );
+                  return (
+                    <div key={key} className={styles.statRow}>
+                      <div className={styles.statLabel}>{label}</div>
+                      <div className={styles.statBarWrap}>
+                        <div
+                          className={styles.statBarFill}
+                          style={{
+                            width: `${pct}%`,
+                            background:
+                              typeColors[t1] || "rgba(255,255,255,0.06)",
+                          }}
+                        />
+                      </div>
+                      <div className={styles.statValue}>{v}</div>
+                    </div>
+                  );
+                })}
+                <div className={styles.statTotal}>
+                  <div className={styles.statLabel}>Total</div>
+                  <div
+                    className={styles.statBarWrap}
+                    style={{ visibility: "hidden" }}
+                  />
+                  <div className={styles.statValue}>{totalBase}</div>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.statsLoading}>Carregando...</div>
             )}
           </div>
         </div>

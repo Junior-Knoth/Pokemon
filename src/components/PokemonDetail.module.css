@@ -16,6 +16,8 @@
   padding: 16px;
   box-sizing: border-box;
   position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 .close {
   position: absolute;
@@ -110,4 +112,62 @@
 .body {
   margin-top: 12px;
   color: #cfe6ff;
+}
+
+.statsSection {
+  margin-top: 12px;
+}
+
+.statsTitle {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.statsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statLabel {
+  width: 72px;
+  color: #9fb0c8;
+  font-size: 13px;
+}
+
+.statBarWrap {
+  flex: 1 1 0;
+  background: rgba(255, 255, 255, 0.04);
+  height: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.statBarFill {
+  height: 100%;
+  border-radius: 6px 0 0 6px;
+}
+
+.statValue {
+  width: 44px;
+  text-align: right;
+  color: #e6edf3;
+}
+
+.statsLoading {
+  color: #9fb0c8;
+}
+
+.statTotal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-weight: 700;
 }
