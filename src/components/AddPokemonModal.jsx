@@ -307,23 +307,13 @@ export default function AddPokemonModal({
       </div>
       {showConfirm ? (
         <div className={styles.confirmBackdrop} onClick={cancelCreate}>
-          <div
-            className={styles.confirmBox}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className={styles.confirmBox} onClick={(e) => e.stopPropagation()}>
             <p>
-              Você tem certeza que quer criar um {species || "(espécie)"}{" "}
-              {genderLabel(gender)} chamado de {nickname || "(sem apelido)"}{" "}
-              para o jogo {currentGame?.name || "(jogo)"}?
+              Você tem certeza que quer criar um {species || "(espécie)"} {' '}
+              {genderLabel(gender)} chamado de {nickname || "(sem apelido)"} para o jogo {currentGame?.name || "(jogo)"}?
             </p>
-            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-              <button
-                className={styles.apply}
-                onClick={async () => {
-                  setShowConfirm(false);
-                  await handleCreate();
-                }}
-              >
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <button className={styles.apply} onClick={async () => { setShowConfirm(false); await handleCreate(); }}>
                 Confirmar
               </button>
               <button className={styles.clear} onClick={cancelCreate}>

@@ -195,7 +195,32 @@ export default function PokemonDetail({ pokemon, onClose }) {
     fairy: "#D685AD",
   };
 
+  function formatEvoDetails(d) {
+    if (!d) return "";
+    const parts = [];
+    if (d.trigger?.name) {
+      const trig = d.trigger.name;
+      if (trig === "level-up") {
+        if (d.min_level) parts.push(`Level ${d.min_level}`);
+        else parts.push("Ao subir de nível");
+      } else if (trig === "use-item") {
+        if (d.item?.name)
+          parts.push(`Usar ${capitalizeWord(d.item.name.replace(/-/g, " "))}`);
+        else parts.push("Usar item");
+      } else if (trig === "trade") {
+        parts.push("Troca");
+      } else {
+        parts.push(capitalizeWord(trig));
+      }
+    }
+    if (d.min_happiness) parts.push(`Happiness ≥ ${d.min_happiness}`);
+    if (d.time_of_day) parts.push(`Hora: ${capitalizeWord(d.time_of_day)}`);
+    if (d.location) parts.push(`Local: ${d.location?.name || ""}`);
+    return parts.join(" • ");
+  }
+
   const [stats, setStats] = useState(null);
+  const [evolutions, setEvolutions] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -223,6 +248,75 @@ export default function PokemonDetail({ pokemon, onClose }) {
       }
     }
     fetchStats();
+    return () => {
+      mounted = false;
+    };
+  }, [pokemon.species_name, pokemon.species]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchEvoChain() {
+      try {
+        const name = (
+          pokemon.species_name ||
+          pokemon.species ||
+          ""
+        ).toLowerCase();
+        if (!name) return;
+        const speciesRes = await fetch(
+          `https://pokeapi.co/api/v2/pokemon-species/${encodeURIComponent(name)}`,
+        );
+        if (!speciesRes.ok) {
+          if (mounted) setEvolutions([]);
+          return;
+        }
+        const speciesData = await speciesRes.json();
+        const evoUrl = speciesData.evolution_chain?.url;
+        if (!evoUrl) {
+          if (mounted) setEvolutions([]);
+          return;
+        }
+        const evoRes = await fetch(evoUrl);
+        if (!evoRes.ok) {
+          if (mounted) setEvolutions([]);
+          return;
+        }
+        const evoData = await evoRes.json();
+
+        const chain = [];
+        function traverse(node, from = null) {
+          const species = node.species?.name || null;
+          const details = node.evolution_details || [];
+          if (species) chain.push({ name: species, evoDetails: details, from });
+          (node.evolves_to || []).forEach((child) => traverse(child, species));
+        }
+        traverse(evoData.chain, null);
+
+        const enriched = await Promise.all(
+          chain.map(async (c) => {
+            try {
+              const r = await fetch(
+                `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(c.name)}`,
+              );
+              if (!r.ok) return { ...c, sprite: null };
+              const d = await r.json();
+              const sprite =
+                d.sprites?.other?.["official-artwork"]?.front_default ||
+                d.sprites?.front_default ||
+                null;
+              return { ...c, sprite };
+            } catch (e) {
+              return { ...c, sprite: null };
+            }
+          }),
+        );
+
+        if (mounted) setEvolutions(enriched);
+      } catch (e) {
+        if (mounted) setEvolutions([]);
+      }
+    }
+    fetchEvoChain();
     return () => {
       mounted = false;
     };
@@ -399,6 +493,44 @@ export default function PokemonDetail({ pokemon, onClose }) {
               </div>
             ) : (
               <div className={styles.statsLoading}>Carregando...</div>
+            )}
+          </div>
+
+          <div className={styles.evoSection}>
+            <div className={styles.statsTitle}>Evolução</div>
+            {!evolutions ? (
+              <div className={styles.statsLoading}>Carregando...</div>
+            ) : evolutions.length === 0 ? (
+              <div className={styles.statsLoading}>Sem evolução conhecida</div>
+            ) : (
+              <div className={styles.evoList}>
+                {evolutions.map((e, idx) => (
+                  <div key={`${e.name}-${idx}`} className={styles.evoItem}>
+                    <div className={styles.evoCard}>
+                      {e.sprite ? (
+                        <img
+                          src={e.sprite}
+                          alt={e.name}
+                          className={styles.evoImage}
+                        />
+                      ) : (
+                        <div className={styles.evoPlaceholder} />
+                      )}
+                      <div className={styles.evoName}>{pretty(e.name)}</div>
+                    </div>
+                    {e.evoDetails && e.evoDetails.length > 0 ? (
+                      <div className={styles.evoInfo}>
+                        {formatEvoDetails(e.evoDetails[0])}
+                      </div>
+                    ) : (
+                      <div className={styles.evoInfo}>—</div>
+                    )}
+                    {idx < evolutions.length - 1 ? (
+                      <div className={styles.evoArrow} />
+                    ) : null}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
