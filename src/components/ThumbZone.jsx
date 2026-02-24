@@ -8,10 +8,12 @@ import {
 } from "lucide-react";
 import styles from "./ThumbZone.module.css";
 import FilterSheet from "./FilterSheet";
+import AddPokemonModal from "./AddPokemonModal";
 
-export default function ThumbZone({ initialFilters, onApply }) {
+export default function ThumbZone({ initialFilters, onApply, selected }) {
   const [hasScroll, setHasScroll] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
     function check() {
@@ -39,6 +41,10 @@ export default function ThumbZone({ initialFilters, onApply }) {
 
   function openFilters() {
     setShowFilters(true);
+  }
+
+  function openAdd() {
+    setShowAdd(true);
   }
 
   function closeFilters() {
@@ -78,7 +84,11 @@ export default function ThumbZone({ initialFilters, onApply }) {
         </div>
 
         <div className={styles.center}>
-          <button className={styles.add} aria-label="Adicionar pokémon">
+          <button
+            className={styles.add}
+            aria-label="Adicionar pokémon"
+            onClick={openAdd}
+          >
             Adicionar pokémon
           </button>
         </div>
@@ -98,6 +108,16 @@ export default function ThumbZone({ initialFilters, onApply }) {
         onClose={closeFilters}
         onApply={handleApply}
         initial={initialFilters}
+      />
+      <AddPokemonModal
+        open={showAdd}
+        onClose={() => setShowAdd(false)}
+        selectedGame={selected}
+        onCreated={(p) => {
+          setShowAdd(false);
+          console.log("Created pokemon", p);
+          onCreated?.(p);
+        }}
       />
     </>
   );

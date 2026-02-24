@@ -10,6 +10,7 @@ export default function PokemonGrid({
   rows = 5,
   cols = 3,
   sort = "none",
+  reloadKey = 0,
 }) {
   const [pokemons, setPokemons] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -42,7 +43,7 @@ export default function PokemonGrid({
     return () => {
       mounted = false;
     };
-  }, [selected]);
+  }, [selected, reloadKey]);
 
   const max = rows * cols;
 
