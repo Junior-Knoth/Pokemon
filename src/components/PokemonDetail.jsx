@@ -211,6 +211,30 @@ export default function PokemonDetail({ pokemon, onClose }) {
             <div className={styles.small}>
               Gênero: {formatGender(pokemon.gender)}
             </div>
+            {(t1 || t2) && (
+              <div className={styles.typesRow}>
+                {t1 ? (
+                  <div
+                    className={styles.typeTag}
+                    style={{
+                      borderBottom: `2px solid ${typeColors[t1] || "transparent"}`,
+                    }}
+                  >
+                    {pretty(t1)}
+                  </div>
+                ) : null}
+                {t2 ? (
+                  <div
+                    className={styles.typeTag}
+                    style={{
+                      borderBottom: `2px solid ${typeColors[t2] || "transparent"}`,
+                    }}
+                  >
+                    {pretty(t2)}
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
         </div>
 

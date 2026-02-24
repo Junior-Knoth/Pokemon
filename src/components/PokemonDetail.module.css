@@ -96,6 +96,17 @@
   font-size: 13px;
   color: #9fb0c8;
 }
+.typesRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.typeTag {
+  padding: 2px 6px;
+  font-size: 13px;
+  border-bottom: 2px solid transparent;
+}
 .body {
   margin-top: 12px;
   color: #cfe6ff;
