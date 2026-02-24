@@ -1,5 +1,5 @@
 import styles from "./Menu.module.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Header from "../components/Header";
 import ThumbZone from "../components/ThumbZone";
 import PokemonGrid from "../components/PokemonGrid";
@@ -10,6 +10,7 @@ export default function Menu({ selected, onSelect }) {
   const [query, setQuery] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
   const [localAdds, setLocalAdds] = useState([]);
+  const exportFnRef = useRef(null);
   // sort state: 'none' | 'recent' | 'alpha-asc' | 'alpha-desc'
   const [sort, setSort] = useState("none");
   // store previous sort so alpha can revert back to it on 3rd click
@@ -38,9 +39,33 @@ export default function Menu({ selected, onSelect }) {
     });
   }
 
+  function handleExport() {
+    const fn = exportFnRef.current;
+    if (typeof fn !== "function") {
+      alert("Nenhum dado disponível para exportar");
+      return;
+    }
+    try {
+      const list = fn() || [];
+      const json = JSON.stringify(list, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pokemons.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Export error", e);
+      alert("Erro ao exportar");
+    }
+  }
+
   return (
     <div className={styles.container}>
-      <Header selected={selected} onSelect={onSelect} />
+      <Header selected={selected} onSelect={onSelect} onExport={handleExport} />
       <SearchBar
         value={query}
         onChange={setQuery}
@@ -62,6 +87,9 @@ export default function Menu({ selected, onSelect }) {
               String(p.id) === String(row.id) ? { ...p, ...row } : p,
             ),
           );
+        }}
+        registerExport={(fn) => {
+          exportFnRef.current = fn;
         }}
       />
       <div className={styles.bottomSpacer} />

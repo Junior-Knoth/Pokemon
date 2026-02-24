@@ -14,6 +14,7 @@ export default function PokemonGrid({
   reloadKey = 0,
   added = [],
   onUpdated,
+  registerExport,
 }) {
   const [pokemons, setPokemons] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -131,6 +132,13 @@ export default function PokemonGrid({
         return nick.includes(searchLower) || species.includes(searchLower);
       })
     : applied;
+
+  // expose current filtered (searched) list to parent for export
+  useEffect(() => {
+    if (typeof registerExport === "function") {
+      registerExport(() => searched.slice());
+    }
+  }, [registerExport, searched]);
 
   const total = searched.length;
   const totalPages = Math.max(1, Math.ceil(total / max));

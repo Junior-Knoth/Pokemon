@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
 import { supabase } from "../supabase/client";
 import styles from "./Header.module.css";
 
-export default function Header({ selected, onSelect }) {
+export default function Header({ selected, onSelect, onExport }) {
   const [open, setOpen] = useState(false);
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [openLeft, setOpenLeft] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -49,7 +50,10 @@ export default function Header({ selected, onSelect }) {
   useEffect(() => {
     function onDoc(e) {
       if (!ref.current) return;
-      if (!ref.current.contains(e.target)) setOpen(false);
+      if (!ref.current.contains(e.target)) {
+        setOpen(false);
+        setOpenLeft(false);
+      }
     }
     document.addEventListener("click", onDoc);
     return () => document.removeEventListener("click", onDoc);
@@ -72,7 +76,29 @@ export default function Header({ selected, onSelect }) {
 
   return (
     <header className={styles.header} ref={ref}>
-      <div className={styles.left}></div>
+      <div className={styles.left}>
+        <button
+          className={styles.hamburger}
+          onClick={() => setOpenLeft((s) => !s)}
+          aria-haspopup="listbox"
+          aria-expanded={openLeft}
+        >
+          <Menu />
+        </button>
+        {openLeft && (
+          <ul className={styles.leftList} role="listbox">
+            <button
+              className={`${styles.item} ${styles.exportBtn}`}
+              onClick={() => {
+                onExport?.();
+                setOpenLeft(false);
+              }}
+            >
+              Exportar JSON
+            </button>
+          </ul>
+        )}
+      </div>
       <div className={styles.brand}>
         <h1 className={styles.title}>
           {selected?.name ?? "Nenhum jogo selecionado"}
