@@ -18,6 +18,7 @@
   padding: 12px 16px 80px 16px; /* leave room for fixed apply */
   box-sizing: border-box;
   color: #e6edf3;
+  overflow-y: auto;
 }
 
 .handle {
@@ -62,7 +63,7 @@
 
 .typesGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 .typeBtn {
