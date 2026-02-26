@@ -134,9 +134,7 @@ export default function LoginModal({ onAuth }) {
             </button>
           </div>
         </form>
-        <p className={styles.hint}>
-          Somente e-mail e senha. Sem estilos chamativos.
-        </p>
+        <p className={styles.hint}>Somente e-mail e senha.</p>
       </div>
     </div>
   );
