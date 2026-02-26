@@ -9,7 +9,7 @@ export default function PokemonGrid({
   filters,
   search,
   rows = 6,
-  cols = 5,
+  cols = 4,
   sort = "none",
   reloadKey = 0,
   added = [],

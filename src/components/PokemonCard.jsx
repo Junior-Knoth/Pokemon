@@ -31,7 +31,32 @@ export default function PokemonCard({ pokemon, onDeleted, onUpdated }) {
   const primaryType = String(
     pokemon.type_1 || pokemon.type1 || "",
   ).toLowerCase();
-  const borderColor = typeColors[primaryType] || "rgba(255,255,255,0.03)";
+  // border color now reflects gender: male -> blue, female -> red, none/unknown -> white
+  const rawGender = pokemon?.gender;
+  let gNorm = null;
+  if (rawGender !== null && rawGender !== undefined) {
+    const s = String(rawGender).trim();
+    if (s !== "" && s.toLowerCase() !== "null") gNorm = s.toLowerCase();
+  }
+  const maleValues = new Set(["male", "m", "masculino", "masc"]);
+  const femaleValues = new Set(["female", "f", "feminino", "fem"]);
+  const noneValues = new Set([
+    "none",
+    "genderless",
+    "sem genero",
+    "sem-genero",
+    "sem gênero",
+    "nenhum",
+  ]);
+  let borderColor;
+  if (gNorm !== null && maleValues.has(gNorm)) {
+    borderColor = "#2188ff"; // blue
+  } else if (gNorm !== null && femaleValues.has(gNorm)) {
+    borderColor = "#ff3860"; // red
+  } else {
+    // none or unknown -> white
+    borderColor = "#ffffff";
+  }
 
   useEffect(() => {
     // If the incoming pokemon prop has an explicit sprite_url that's different
@@ -80,83 +105,6 @@ export default function PokemonCard({ pokemon, onDeleted, onUpdated }) {
         style={{ cursor: "pointer", border: `1px solid ${borderColor}` }}
       >
         <div className={styles.imageWrapper} style={{ position: "relative" }}>
-          {/* gender badge */}
-          {(() => {
-            const raw = pokemon?.gender;
-            // normalize empty / 'null' strings to actual null
-            let g = null;
-            if (raw !== null && raw !== undefined) {
-              const s = String(raw).trim();
-              if (s !== "" && s.toLowerCase() !== "null") g = s.toLowerCase();
-            }
-
-            const maleValues = new Set(["male", "m", "masculino", "masc"]);
-            const femaleValues = new Set(["female", "f", "feminino", "fem"]);
-            const noneValues = new Set([
-              "none",
-              "genderless",
-              "sem genero",
-              "sem-genero",
-              "sem gênero",
-              "genderless",
-              "nenhum",
-              "none",
-            ]);
-
-            let Icon = HelpCircle;
-            let style = { width: 18, height: 18, color: "white" };
-            let wrapperStyle = {
-              position: "absolute",
-              top: 6,
-              right: 6,
-              width: 22,
-              height: 22,
-              borderRadius: 9999,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-            };
-
-            if (g !== null && maleValues.has(g)) {
-              Icon = Mars;
-              wrapperStyle.background = "#2188ff"; // blue
-            } else if (g !== null && femaleValues.has(g)) {
-              Icon = Venus;
-              wrapperStyle.background = "#ff3860"; // red
-            } else if (g !== null && noneValues.has(g)) {
-              Icon = Slash;
-              wrapperStyle.background = "#e6e6e6"; // light gray
-              style.color = "#333";
-            } else if (g === null) {
-              // unknown (null or empty in DB) -> gradient
-              Icon = HelpCircle;
-              wrapperStyle.background =
-                "linear-gradient(135deg,#2188ff,#ff3860)";
-            } else {
-              // fallback unknown for other unexpected strings
-              Icon = HelpCircle;
-              wrapperStyle.background =
-                "linear-gradient(135deg,#2188ff,#ff3860)";
-            }
-
-            const titleText =
-              g !== null
-                ? maleValues.has(g)
-                  ? "Masculino"
-                  : femaleValues.has(g)
-                    ? "Feminino"
-                    : noneValues.has(g)
-                      ? "Sem gênero"
-                      : "Desconhecido"
-                : "Desconhecido";
-
-            return (
-              <div title={titleText} style={wrapperStyle}>
-                <Icon {...style} />
-              </div>
-            );
-          })()}
           {sprite ? (
             <img
               src={sprite}
